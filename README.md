@@ -47,6 +47,10 @@ cp -r ~/claude-agent/collab-framework ~/.claude/collab-framework
 安装后，所有项目下的 Claude Code 可直接使用
 `/architect`、`/dispatch`、`/save`、`/restore`、`/task`、`/optimize` 命令。
 
+## 详细使用说明
+
+见 [USAGE.md](USAGE.md)，涵盖：调研任务/开发任务下发、任务文件格式、知识库管理、多项目关系处理、会话管理和典型场景示例。
+
 ## 为新项目部署协作框架
 
 详见 `collab-framework/README.md`，核心是 2 步：
