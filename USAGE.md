@@ -170,11 +170,22 @@ cp ~/.claude/collab-framework/CLAUDE-template.md CLAUDE.md
 ### 下发指令格式（固定）
 
 ```
-请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
+## 下一步（→ [目标 GPT 标识]）
+
+请将以下指令发送给 ChatGPT Codex：
+
+> 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
 ```
 
-**注意**：每次给 GPT 一个任务，等结果回来后再下发下一个。
-不要一次给多个任务，GPT 会混淆上下文。
+**目标 GPT 标识示例**：
+- `→ 本地 GPT`
+- `→ 远端 51 GPT · SuBase-SY`
+- `→ 本地 GPT · pytorch`
+
+多仓库并行时每条指令前都必须有标注，用户一眼看清发给哪个会话。
+
+**注意**：每次给同一个 GPT 会话一个任务，等结果回来后再下发下一个。
+不同 GPT 会话（本地/远端）的任务可以并行。
 
 ---
 
@@ -186,6 +197,7 @@ cp ~/.claude/collab-framework/CLAUDE-template.md CLAUDE.md
 **状态**：pending
 **分配给**：ChatGPT Codex
 **创建者**：Claude
+**执行环境**：[本地 / 远端 user@host · 项目名]
 **前置任务**：<编号> 完成后执行（无则删除此行）
 
 ---
@@ -331,12 +343,12 @@ Claude 同时管理多个仓库的任务，但每次只给 GPT 一个仓库的�
 **任务状态追踪**（在 Claude 的会话上下文中维护）：
 
 ```
-核心库：任务 035e 进行中（GPT-1）
-适配器A：任务 009 进行中（GPT-1）
-适配器B：任务 049 进行中（GPT-2，远端机器）
+本地 GPT       核心库:   任务 035e 进行中
+本地 GPT       适配器A:  任务 009  进行中
+远端 GPT (51)  适配器B:  任务 049  进行中
 ```
 
-不同仓库的任务可以并行，但同一仓库的任务必须串行。
+不同 GPT 会话的任务可以并行；同一 GPT 会话内任务必须串行。
 
 ### 远端机器上的仓库
 
