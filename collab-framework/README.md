@@ -26,7 +26,11 @@ cp ~/.claude/collab-framework/CHATGPT-template.md <新项目根目录>/CHATGPT.m
 cp -r ~/.claude/collab-framework/code-agent/ <新项目根目录>/code-agent/
 ```
 
-完成！Claude 的全局 skill 立即可用：
+完成！**推荐从 `~/` 启动 Claude Code**（而非项目目录），
+memory 将存储在全局路径 `~/.claude/projects/-home-<user>/memory/`，
+实现跨项目的协调者视角。Claude 仍可正常读取各项目的 CLAUDE.md。
+
+Claude 的全局 skill 立即可用：
 - `/architect` — 系统设计、任务创建、代码 Review
 - `/dispatch <task-id>` — 下发任务给 GPT
 - `/save` — 保存会话上下文

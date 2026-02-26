@@ -52,8 +52,8 @@ user-invocable: false
 
 ```markdown
 **执行环境**：本地                        # 本机 GPT 会话
-**执行环境**：远端 user@host              # 远端机器上的 GPT 会话
-**执行环境**：本地 · pytorch 项目          # 多仓库时注明具体项目
+**执行环境**：远端 GPT · <仓库名>          # 远端机器上的 GPT 会话
+**执行环境**：本地 · <仓库名>              # 多仓库时注明具体项目
 ```
 
 下发指令末尾必须标注目标 GPT：
@@ -62,7 +62,7 @@ user-invocable: false
 ## 下一步（→ 本地 GPT）
 > 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
 
-## 下一步（→ 远端 51 GPT · SuBase-SY）
+## 下一步（→ 远端 GPT · <仓库名>）
 > 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
 ```
 

@@ -73,7 +73,17 @@ cp ~/.claude/collab-framework/CLAUDE-template.md CLAUDE.md
 
 ### 开始工作
 
-在项目目录下打开 Claude Code，Claude 自动加载全局 skill。
+**推荐从 `~/` 启动 Claude Code**（全局协调者视角）：
+
+```bash
+cd ~
+claude
+```
+
+从 `~/` 启动时，memory 存储在 `~/.claude/projects/-home-<user>/memory/`，
+跨项目全局共享，Claude 可同时协调多个仓库的 GPT 任务。
+Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录。
+
 使用 `/architect` 激活架构师模式开始设计工作。
 
 ---
@@ -103,12 +113,12 @@ cp ~/.claude/collab-framework/CLAUDE-template.md CLAUDE.md
 
 **示例**：
 
-> **用户**：我想知道 subased 守护进程是怎么初始化设备的，让 GPT 调研一下。
+> **用户**：我想知道 serverd 守护进程是怎么初始化设备的，让 GPT 调研一下。
 >
-> **Claude**：（创建任务文件 `041-research-subased-init.md`，内容包含：需要分析的文件路径、
+> **Claude**：（创建任务文件 `041-research-serverd-init.md`，内容包含：需要分析的文件路径、
 > 具体问题列表、知识库相关章节行号）
 >
-> **下发指令**：`请先读取 CHATGPT.md，然后执行 code-agent/tasks/041-research-subased-init.md`
+> **下发指令**：`请先读取 CHATGPT.md，然后执行 code-agent/tasks/041-research-serverd-init.md`
 
 ### 允许插桩的调研
 
@@ -179,8 +189,8 @@ cp ~/.claude/collab-framework/CLAUDE-template.md CLAUDE.md
 
 **目标 GPT 标识示例**：
 - `→ 本地 GPT`
-- `→ 远端 51 GPT · SuBase-SY`
-- `→ 本地 GPT · pytorch`
+- `→ 远端 GPT · <仓库名>`
+- `→ 本地 GPT · <仓库名>`
 
 多仓库并行时每条指令前都必须有标注，用户一眼看清发给哪个会话。
 
@@ -340,12 +350,12 @@ Claude 看到 `[CORE-BUG]` 后，在核心库 `code-agent/tasks/` 创建对应�
 
 Claude 同时管理多个仓库的任务，但每次只给 GPT 一个仓库的一个任务。
 
-**任务状态追踪**（在 Claude 的会话上下文中维护）：
+**任务状态追踪**（在 Claude 的 memory 中维护，见 `memory/gpt-registry.md`）：
 
 ```
-本地 GPT       核心库:   任务 035e 进行中
-本地 GPT       适配器A:  任务 009  进行中
-远端 GPT (51)  适配器B:  任务 049  进行中
+本地 GPT              核心库:   任务 035e 进行中
+本地 GPT · <仓库A>    适配器A:  任务 009  进行中
+远端 GPT · <仓库B>    适配器B:  任务 049  进行中
 ```
 
 不同 GPT 会话的任务可以并行；同一 GPT 会话内任务必须串行。

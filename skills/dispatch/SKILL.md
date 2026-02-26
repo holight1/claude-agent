@@ -20,21 +20,21 @@ argument-hint: "<task-id>"
 ### 2. 读取任务文件，提取关键字段
 
 - **执行环境**：判断目标 GPT
-  - `本地 GPT` → 本地执行
-  - `远端 51 GPT · <仓库名>` → 需 rsync 到远端 51
+  - `本地 GPT` → 本地执行，无需 rsync
+  - `远端 GPT · <仓库名>` → 需 rsync 到远端机器
 
 - **知识库引用检查**：引用格式应为 `§章节号`（如 §20.10），行号会变不要要求。
   若引用完全缺失章节号则提醒补充。
 
-### 3. 远端任务：rsync 到远端 51
+### 3. 远端任务：rsync 到远端机器
 
-若 `执行环境` 为 `远端 51 GPT`，先将任务文件同步到远端：
+若 `执行环境` 为 `远端 GPT`，**先查阅 memory 中的 `gpt-registry.md`**
+获取该 GPT 实例的 rsync 目标路径，然后同步任务文件：
 
 ```bash
-# 路由规则（来自 memory/gpt-registry.md）：
-# 远端 51 GPT · SuBase-SY  → suiyan@192.168.23.51:/data/suiyan/SuBase-SY/code-agent/tasks/
-# 远端 51 GPT · ggml       → suiyan@192.168.23.51:/data/suiyan/llama.cpp-SY/ggml/code-agent/tasks/
-rsync -av <本地任务文件路径> suiyan@192.168.23.51:<远端对应路径>
+# 路由规则来自 memory/gpt-registry.md 的 dispatch 路由表，示例：
+# 远端 GPT · <仓库名>  → user@remote-host:/path/to/repo/code-agent/tasks/
+rsync -av <本地任务文件路径> user@remote-host:<远端对应路径>
 ```
 
 确认 rsync 成功后再输出下发指令。
@@ -51,18 +51,19 @@ rsync -av <本地任务文件路径> suiyan@192.168.23.51:<远端对应路径>
 > 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<完整文件名>.md
 ```
 
-**远端 51 GPT 格式：**
+**远端 GPT 格式：**
 ```
 ---
-## 下一步（→ 远端 51 GPT · <仓库名>）
+## 下一步（→ 远端 GPT · <仓库名>）
 
-任务文件已 rsync 到远端 51。请将以下指令发送给远端 51 GPT（<仓库名>）：
+任务文件已 rsync 到远端。请将以下指令发送给远端 GPT（<仓库名>）：
 
 > 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<完整文件名>.md
 ```
 
 ## 注意
 
-- 下发指令中的目标（本地 / 远端 51）必须与任务文件 `执行环境` 字段一致
+- 下发指令中的目标（本地 / 远端）必须与任务文件 `执行环境` 字段一致
+- 路由规则从 memory 的 `gpt-registry.md` 读取，不要硬编码主机地址
 - 知识库引用用章节号（§4.5），不要要求行号
 - rsync 失败时报错，不要继续输出下发指令
