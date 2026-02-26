@@ -1,37 +1,68 @@
 ---
 description: "Dispatch a task to ChatGPT - find or create task file and output standard instruction"
-allowed-tools: ["Read", "Write", "Glob"]
+allowed-tools: ["Read", "Write", "Glob", "Bash"]
 argument-hint: "<task-id>"
 ---
 
 # /dispatch <task-id> - 下发任务给 GPT
 
-根据 task-id 找到或创建任务文件，输出标准下发指令。
+根据 task-id 找到任务文件，判断目标 GPT，输出标准下发指令。
 
 ## 执行步骤
 
-1. **查找任务文件**：在 `code-agent/tasks/` 中搜索匹配 `<task-id>` 的文件
-   - 搜索模式：`code-agent/tasks/<task-id>*.md`
-   - 如果找到多个匹配，列出让用户选择
+### 1. 查找任务文件
 
-2. **检查任务文件**：
-   - 确认文件包含必要字段（状态、分配给、任务描述）
-   - 确认状态为 `pending` 或需要执行
-   - 如果知识库引用缺少行号范围，发出警告
+在 `code-agent/tasks/` 中搜索匹配 `<task-id>` 的文件：
+- 搜索模式：`code-agent/tasks/<task-id>*.md`
+- 找到多个时列出让用户选择
+- 找不到时提示用户先创建任务文件
 
-3. **输出下发指令**：
+### 2. 读取任务文件，提取关键字段
 
+- **执行环境**：判断目标 GPT
+  - `本地 GPT` → 本地执行
+  - `远端 51 GPT · <仓库名>` → 需 rsync 到远端 51
+
+- **知识库引用检查**：引用格式应为 `§章节号`（如 §20.10），行号会变不要要求。
+  若引用完全缺失章节号则提醒补充。
+
+### 3. 远端任务：rsync 到远端 51
+
+若 `执行环境` 为 `远端 51 GPT`，先将任务文件同步到远端：
+
+```bash
+# 根据任务文件中的仓库名确定目标路径
+# 仓库名 SuBase-SY  → /data/suiyan/SuBase-SY/code-agent/tasks/
+# 仓库名 llama.cpp-SY 或 ggml → /data/suiyan/llama.cpp-SY/ggml/code-agent/tasks/
+rsync -av <本地任务文件路径> suiyan@192.168.23.51:<远端对应路径>
+```
+
+确认 rsync 成功后再输出下发指令。
+
+### 4. 输出下发指令
+
+**本地 GPT 格式：**
 ```
 ---
-## 下一步
+## 下一步（→ 本地 GPT）
 
-请将以下指令发送给 ChatGPT Codex：
+请将以下指令发送给本地 ChatGPT：
+
+> 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<完整文件名>.md
+```
+
+**远端 51 GPT 格式：**
+```
+---
+## 下一步（→ 远端 51 GPT · <仓库名>）
+
+任务文件已 rsync 到远端 51。请将以下指令发送给远端 51 GPT（<仓库名>）：
 
 > 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<完整文件名>.md
 ```
 
 ## 注意
 
-- 如果 task-id 对应的文件不存在，提示用户是否需要创建
-- 知识库引用必须标行号范围（如 `L136-250`），无行号的引用要警告
-- 下发指令格式是固定的，不要修改
+- 下发指令中的目标（本地 / 远端 51）必须与任务文件 `执行环境` 字段一致
+- 知识库引用用章节号（§4.5），不要要求行号
+- rsync 失败时报错，不要继续输出下发指令
