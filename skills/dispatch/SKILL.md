@@ -31,9 +31,9 @@ argument-hint: "<task-id>"
 若 `执行环境` 为 `远端 51 GPT`，先将任务文件同步到远端：
 
 ```bash
-# 根据任务文件中的仓库名确定目标路径
-# 仓库名 SuBase-SY  → /data/suiyan/SuBase-SY/code-agent/tasks/
-# 仓库名 llama.cpp-SY 或 ggml → /data/suiyan/llama.cpp-SY/ggml/code-agent/tasks/
+# 路由规则（来自 memory/gpt-registry.md）：
+# 远端 51 GPT · SuBase-SY  → suiyan@192.168.23.51:/data/suiyan/SuBase-SY/code-agent/tasks/
+# 远端 51 GPT · ggml       → suiyan@192.168.23.51:/data/suiyan/llama.cpp-SY/ggml/code-agent/tasks/
 rsync -av <本地任务文件路径> suiyan@192.168.23.51:<远端对应路径>
 ```
 
