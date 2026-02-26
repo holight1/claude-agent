@@ -14,7 +14,8 @@
 6. [知识库管理](#6-知识库管理)
 7. [多项目逻辑关系](#7-多项目逻辑关系)
 8. [会话管理](#8-会话管理)
-9. [常见场景示例](#9-常见场景示例)
+9. [项目管理](#9-项目管理)
+10. [常见场景示例](#10-常见场景示例)
 
 ---
 
@@ -474,6 +475,42 @@ Claude 读取 `.session-context.md` 并展示当前状态，
 4. Claude 为每个适配器创建跟进任务（说明 API 变更细节）
 5. 分别下发给各适配器的 GPT
 ```
+
+---
+
+## 9. 项目管理
+
+从 `~/` 启动 Claude 后，用 `/project-add` 和 `/project-remove` 管理哪些项目纳入协调。
+
+### /project-add — 注册项目
+
+```
+/project-add /path/to/myproject
+/project-add /path/to/myproject remote: user@host:/remote/path
+```
+
+Claude 会：
+1. 检查项目是否有 `CHATGPT.md` 和 `code-agent/`，缺失时给出补全命令（不阻止注册）
+2. 在 global memory（`MEMORY.md` + `gpt-registry.md`）中添加项目拓扑、GPT 实例、仓库条目
+3. 若有远端，同时注册 `远端 GPT · <project-name>` 实例和 dispatch 路由
+
+### /project-remove — 注销项目
+
+```
+/project-remove myproject
+```
+
+Claude 会：
+1. 列出将从 memory 移除的条目，请用户确认
+2. 从 `MEMORY.md` 删除拓扑块、GPT 实例行、仓库行
+3. 将 `gpt-registry.md` 中的对应实例移至"历史停用实例"
+
+**不会修改任何项目文件**——`CHATGPT.md`、`code-agent/`、知识库、任务文件全部保留。
+随时可以重新 `/project-add` 恢复管理。
+
+---
+
+## 10. 常见场景示例
 
 ### 场景四：新人接手项目
 
