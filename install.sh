@@ -15,7 +15,7 @@ echo "Claude: ${CLAUDE_DIR}"
 echo ""
 
 # ── 1. Skills ──────────────────────────────────────────────────────────────
-echo "[1/4] Installing skills..."
+echo "[1/5] Installing skills..."
 mkdir -p "${CLAUDE_DIR}/skills"
 for skill_dir in "${REPO_DIR}/skills"/*/; do
     skill_name="$(basename "${skill_dir}")"
@@ -25,7 +25,7 @@ for skill_dir in "${REPO_DIR}/skills"/*/; do
 done
 
 # ── 2. Agents ──────────────────────────────────────────────────────────────
-echo "[2/4] Installing agents..."
+echo "[2/5] Installing agents..."
 mkdir -p "${CLAUDE_DIR}/agents"
 agent_count=0
 for f in "${REPO_DIR}/agents"/*.md; do
@@ -36,13 +36,22 @@ for f in "${REPO_DIR}/agents"/*.md; do
 done
 [ "$agent_count" -eq 0 ] && echo "  (no agents)"
 
-# ── 3. collab-framework ────────────────────────────────────────────────────
-echo "[3/4] Installing collab-framework..."
+# ── 3. Roles (unified AI config files) ────────────────────────────────────
+echo "[3/5] Installing roles..."
+mkdir -p "${CLAUDE_DIR}/roles"
+for f in "${REPO_DIR}/roles"/*.md; do
+    [ -f "$f" ] || continue
+    cp "$f" "${CLAUDE_DIR}/roles/"
+    echo "  + $(basename "$f")"
+done
+
+# ── 4. collab-framework ────────────────────────────────────────────────────
+echo "[4/5] Installing collab-framework..."
 cp -r "${REPO_DIR}/collab-framework" "${CLAUDE_DIR}/collab-framework"
 echo "  + collab-framework"
 
-# ── 4. Global memory (~/  context) ────────────────────────────────────────
-echo "[4/4] Global memory (~/  context)..."
+# ── 5. Global memory (~/  context) ────────────────────────────────────────
+echo "[5/5] Global memory (~/  context)..."
 if [ ! -d "${MEMORY_DIR}" ]; then
     mkdir -p "${MEMORY_DIR}"
     cp "${REPO_DIR}/memory-template/MEMORY.md"       "${MEMORY_DIR}/MEMORY.md"
@@ -59,3 +68,4 @@ echo ""
 echo "Next steps:"
 echo "  1. cd ~ && claude          # launch in global coordinator mode"
 echo "  2. /project-add <path>     # register your first project"
+echo "     (auto-creates CHATGPT.md/GEMINI.md symlinks → ~/.claude/roles/)"

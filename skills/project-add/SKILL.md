@@ -20,20 +20,33 @@ argument-hint: "<project-path> [remote: user@host:remote-path]"
 派生：
 - `project-name`：`basename(project-path)`
 
-### 2. 检查项目配置文件
+### 2. 检查并创建项目配置文件
 
 ```bash
 ls <project-path>/CHATGPT.md 2>/dev/null && echo "OK" || echo "缺失"
+ls <project-path>/GEMINI.md  2>/dev/null && echo "OK" || echo "缺失"
 ls <project-path>/code-agent/ 2>/dev/null && echo "OK" || echo "缺失"
 ```
 
-- 若 `CHATGPT.md` 缺失，提示补全命令（不阻止注册）：
+- 若 `CHATGPT.md` 缺失，创建 symlink（不阻止注册）：
+  ```bash
+  ln -s ~/.claude/roles/gpt.md <project-path>/CHATGPT.md
   ```
-  cp ~/.claude/collab-framework/CHATGPT-template.md <project-path>/CHATGPT.md
+- 若 `GEMINI.md` 缺失，创建 symlink（不阻止注册）：
+  ```bash
+  ln -s ~/.claude/roles/gemini.md <project-path>/GEMINI.md
   ```
-- 若 `code-agent/` 缺失，提示补全命令（不阻止注册）：
-  ```
+- 若 `code-agent/` 缺失，复制骨架并替换 ai-collaboration-framework.md 为 symlink（不阻止注册）：
+  ```bash
   cp -r ~/.claude/collab-framework/code-agent/ <project-path>/code-agent/
+  rm <project-path>/code-agent/ai-collaboration-framework.md
+  ln -s ~/.claude/collab-framework/code-agent/ai-collaboration-framework.md \
+        <project-path>/code-agent/ai-collaboration-framework.md
+  ```
+- 若 `code-agent/` 已存在但 `ai-collaboration-framework.md` 不是 symlink，替换之：
+  ```bash
+  ln -sf ~/.claude/collab-framework/code-agent/ai-collaboration-framework.md \
+         <project-path>/code-agent/ai-collaboration-framework.md
   ```
 
 ### 3. 确认 memory 路径
