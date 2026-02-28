@@ -3,103 +3,103 @@ description: "Optimize context - archive completed tasks, sync knowledge base, r
 allowed-tools: ["Read", "Write", "Glob", "Grep", "Bash"]
 ---
 
-# /optimize - 优化清理
+# /optimize - 创建清理任务并下发给 GPT
 
-按以下流程执行任务归档和知识库同步，减少 context 消耗。
+任务清理统一由 GPT/Gemini 执行，Claude 负责创建任务文件并下发。
 
 ## 执行流程
 
-### 步骤 1：列出所有任务文件状态
+### 步骤 1：确定清理范围
+
+询问用户或从上下文判断：
+- 清理哪些仓库（默认：当前会话涉及的所有仓库）
+- 哪些任务文件**保留**（通常是状态 `pending` 且当前正在执行的）
+- 清理目标：归档已完成任务，检查知识库覆盖
+
+### 步骤 2：列出各仓库任务文件
 
 ```bash
-# 列出所有任务文件
-ls -la code-agent/tasks/*.md
-
-# 检查每个任务的状态
-grep -l "状态.*done\|状态.*completed" code-agent/tasks/*.md
+ls ~/SuBase-SY/code-agent/tasks/
+ls ~/gem5-a4e/code-agent/tasks/
+ls ~/a4e_multi_core/code-agent/tasks/
+ls ~/llama.cpp-SY/ggml/code-agent/tasks/
+ls ~/pytorch/code-agent/tasks/
+# 根据实际项目调整
 ```
 
-### 步骤 2：识别可清理的任务
+### 步骤 3：创建清理任务文件
 
-**可清理条件**：
-- 状态为 `done` 或 `completed`
-- 不在"保留列表"中（见下方）
+任务文件位置：`~/code-agent/tasks/<id>-cleanup-<scope>.md`
 
-**保留列表**（不清理）：
-- 与当前进行中的设计 MD 相关的任务
-- session-context.md 中"下一步工作"引用的任务
-- 最近 3 个已完成任务（保留作为参考）
+任务文件模板：
 
-### 步骤 3：检查待清理任务的知识库同步
+```markdown
+# 任务：<ID> — <仓库/范围> 任务清理
 
-对于每个待清理任务，检查其"执行结果"部分：
-
-1. **是否有新发现的规律/约定？** → 同步到 `code-agent/knowledge/` 对应主题文件
-2. **是否有可复用的代码模式？** → 同步到 `code-agent/knowledge/` 对应主题文件
-3. **是否修正了之前的错误认知？** → 更新 `code-agent/knowledge/` 对应主题文件
-
-### 步骤 4：检查知识库冗余
-
-审查 `code-agent/knowledge/` 各主题文件：
-
-1. **重复内容**：同一信息出现在多个文件
-2. **过时内容**：已被后续任务修正的信息
-3. **过于详细**：可精简的描述
-
-### 步骤 5：执行清理
-
-**独立任务**（无关联设计）：
-```bash
-mkdir -p code-agent/tasks/archived
-mv code-agent/tasks/xxx.md code-agent/tasks/archived/
-```
-
-**设计-实现配对**（有关联设计文件）：
-```bash
-mkdir -p code-agent/completed/tasks code-agent/completed/designs
-mv code-agent/tasks/xxx.md code-agent/completed/tasks/
-mv code-agent/designs/xxx.md code-agent/completed/designs/
-```
-
-**重要**：`code-agent/completed/` 目录下的文件**严禁自动加载到 context**，除非用户明确要求。
-
-### 步骤 6：更新 session-context.md
-
-- 从任务表格中移除已归档的任务
-- 更新"下一步工作"
+**状态**：pending
+**分配给**：Gemini
+**创建者**：Claude
+**执行环境**：本地 GPT · <主仓库>（Gemini 实例，跨仓库操作）
+**工作目录**：`/home/holight`
 
 ---
 
-## 输出格式
+## 保留任务
 
-```markdown
-## Context 优化结果
+（列出不得归档的任务文件，含原因）
 
-### 待清理任务
-| 任务文件 | 原因 |
-|----------|------|
-| 040-xxx.md | 已完成，无需保留 |
+## 执行步骤
 
-### 保留任务
-| 任务文件 | 保留原因 |
-|----------|----------|
-| 053-xxx.md | 进行中 |
+对每个仓库按此流程：
 
-### 知识库同步
-| 来源任务 | 同步内容 | 目标文件 |
-|----------|----------|----------|
-| 051-xxx.md | 异步资源释放表 | knowledge/02-pitfalls.md |
+### 步骤 1：读任务文件，检查知识库覆盖
 
-### 清理统计
-- 归档任务数：X
-- 知识库新增：X 条
-- 知识库精简：X 处
+对每个任务文件：
+1. 读取"执行结果"部分（若有）
+2. 判断是否有尚未进入知识库的关键信息（坑点、根因、API 约定、架构细节）
+3. 若有，补充到对应知识库章节，在 `10-changelog.md` 追加记录
+
+### 步骤 2：归档
+
+```bash
+mkdir -p <repo>/code-agent/tasks/archived
+mv <repo>/code-agent/tasks/<task>.md <repo>/code-agent/tasks/archived/
+```
+
+无执行结果的纯 pending 任务可直接删除。
+
+## 各仓库任务清单
+
+（列出每个仓库需处理的任务文件名）
+
+## 执行结果
+
+（GPT 填写）
+
+## 下一步（→ 本地 GPT · <仓库>）
+
+> 请先读取 ~/<仓库>/GEMINI.md，然后执行本任务文件
+```
+
+### 步骤 4：输出下发指令
+
+```
+---
+## 下一步（→ 本地 GPT · <仓库>）
+
+**AI：Gemini**（理由：清理/整理任务，无代码实现）
+
+请将以下指令发送给 Gemini：
+
+> 请先读取 ~/<主仓库>/GEMINI.md，然后执行 ~/code-agent/tasks/<完整文件名>.md
 ```
 
 ---
 
 ## 注意事项
 
-- 设计 MD 文件（`code-agent/designs/`）由用户手动清理，此命令不处理
-- 如不确定是否应清理某任务，询问用户
+- Claude **不自己执行**清理，只创建任务文件并输出下发指令
+- 清理任务统一放在 `~/code-agent/tasks/`（全局任务目录）
 - 归档而非删除，便于回溯
+- 知识库更新：GPT 在任务文件"执行结果"中列出补充摘要
+- 设计文档（`code-agent/designs/`）由用户手动清理，不纳入此任务
