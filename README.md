@@ -1,6 +1,6 @@
 # claude-agent
 
-Claude（设计/协调）+ ChatGPT Codex（编码）协作框架的全局配置与可移植模板。
+Claude（设计/协调）+ GPT / Gemini（编码与调研）协作框架的全局配置与可移植模板。
 
 ## 目录结构
 
@@ -9,7 +9,8 @@ claude-agent/
 ├── install.sh                      # 一键安装/升级脚本
 ├── skills/                         # Claude Code 全局 skill
 │   ├── architect/SKILL.md          # 架构师角色：系统设计、任务创建、代码 Review
-│   ├── dispatch/SKILL.md           # /dispatch <task-id>：下发任务给 GPT
+│   ├── assign-ai/SKILL.md          # /assign-ai <task>：路由到 GPT 或 Gemini
+│   ├── dispatch/SKILL.md           # /dispatch <task-id>：下发任务给指定 AI
 │   ├── task/SKILL.md               # /task：查看当前任务状态
 │   ├── save/SKILL.md               # /save：保存会话上下文
 │   ├── restore/SKILL.md            # /restore：恢复会话上下文
@@ -42,7 +43,7 @@ bash ~/claude-agent/install.sh
 脚本完成：skills 安装、agents 安装、collab-framework 安装、global memory 初始化（已有则跳过）。
 
 安装后可用命令：
-`/architect`、`/dispatch`、`/save`、`/restore`、`/task`、`/optimize`、`/project-add`、`/project-remove`
+`/architect`、`/assign-ai`、`/dispatch`、`/save`、`/restore`、`/task`、`/optimize`、`/project-add`、`/project-remove`
 
 ## 详细使用说明
 

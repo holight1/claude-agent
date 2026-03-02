@@ -14,6 +14,7 @@
 | `本地 GPT` | 无需 rsync | 本地 ChatGPT |
 | `本地 GPT · <仓库名>` | 无需 rsync | 本地 ChatGPT |
 | `远端 GPT · <仓库名>` | 见各实例"rsync 目标"字段 | 远端 ChatGPT |
+| `Gemini` | 无需 rsync | 本地 Gemini（联网） |
 
 ## 历史停用实例
 

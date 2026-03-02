@@ -14,34 +14,36 @@
 6. [知识库管理](#6-知识库管理)
 7. [多项目逻辑关系](#7-多项目逻辑关系)
 8. [会话管理](#8-会话管理)
-9. [项目管理](#9-项目管理)
-10. [常见场景示例](#10-常见场景示例)
+9. [AI 选型与下发](#9-ai-选型与下发)
+10. [项目管理](#10-项目管理)
+11. [常见场景示例](#11-常见场景示例)
 
 ---
 
 ## 1. 核心思路
 
-**分工**：Claude 负责设计和协调，ChatGPT Codex 负责编码和调研。
+**分工**：Claude 负责设计和协调，GPT / Gemini 负责编码和调研。
 
 ```
 用户需求
   → Claude 分析、拆解、创建任务文件
-  → 用户将任务指令发给 ChatGPT Codex
-  → GPT 执行任务、填写结果
+  → /assign-ai 决定派给 GPT 还是 Gemini
+  → 用户将任务指令发给对应 AI
+  → AI 执行任务、填写结果
   → Claude Review 结果、决定下一步
 ```
 
 **为什么这样分工？**
 
 - Claude 有完整的对话上下文，适合做设计决策和任务拆解
-- ChatGPT Codex 每次从零开始，适合聚焦单一任务的编码执行
+- GPT / Gemini 每次从零开始，适合聚焦单一任务的编码执行
 - 任务文件是两者之间的"合同"，清晰定义输入和输出
 
 **关键约束**：
 
-- GPT 每次必须先读 `CHATGPT.md`，获取项目规范
-- 每个任务文件是独立的，GPT 不依赖之前任务的记忆
-- Claude 不自己写代码，调研复杂问题也交给 GPT
+- AI 每次必须先读 `CHATGPT.md`（或 `GEMINI.md`），获取项目规范
+- 每个任务文件是独立的，AI 不依赖之前任务的记忆
+- Claude 不自己写代码，调研复杂问题也交给 GPT / Gemini
 
 ---
 
@@ -180,23 +182,26 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 
 ### 下发指令格式（固定）
 
+用 `/dispatch <task-id>` 自动生成，或手写：
+
 ```
-## 下一步（→ [目标 GPT 标识]）
+## 下一步（→ [目标 AI 标识]）
 
-请将以下指令发送给 ChatGPT Codex：
+请将以下指令发送给 ChatGPT / Gemini：
 
-> 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
+> 请先读取 CHATGPT.md（或 GEMINI.md），然后执行 code-agent/tasks/<文件名>.md
 ```
 
-**目标 GPT 标识示例**：
+**目标 AI 标识示例**：
 - `→ 本地 GPT`
-- `→ 远端 GPT · <仓库名>`
-- `→ 本地 GPT · <仓库名>`
+- `→ 远端 51 GPT · <仓库名>`
+- `→ Gemini`
 
 多仓库并行时每条指令前都必须有标注，用户一眼看清发给哪个会话。
+不清楚该派给谁时，先用 `/assign-ai` 决策。
 
-**注意**：每次给同一个 GPT 会话一个任务，等结果回来后再下发下一个。
-不同 GPT 会话（本地/远端）的任务可以并行。
+**注意**：每次给同一个 AI 会话一个任务，等结果回来后再下发下一个。
+不同 AI 会话的任务可以并行。
 
 ---
 
@@ -206,7 +211,7 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 # 任务：<编号> — <标题>
 
 **状态**：pending
-**分配给**：ChatGPT Codex
+**分配给**：[本地 GPT / 本地 GPT · <仓库名> / 远端 51 GPT · <仓库名> / Gemini]
 **创建者**：Claude
 **执行环境**：[本地 / 远端 user@host · 项目名]
 **前置任务**：<编号> 完成后执行（无则删除此行）
@@ -250,7 +255,7 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 
 ---
 
-## 执行结果（由 ChatGPT Codex 填写）
+## 执行结果（由 AI 填写）
 
 ```
 
@@ -435,50 +440,53 @@ Claude 读取 `.session-context.md` 并展示当前状态，
 
 ---
 
-## 9. 常见场景示例
+## 9. AI 选型与下发
 
-### 场景一：从零开始一个新功能
+### /assign-ai — 路由到 GPT 或 Gemini
 
-```
-1. 用户：我想实现 XX 功能
-2. Claude（/architect）：
-   - 创建设计文档 code-agent/designs/xx-design.md
-   - 拆分为 3 个子任务：001a（调研）、001b（实现）、001c（验证）
-   - 给出任务 001a 下发指令
-3. 用户 → GPT：请先读取 CHATGPT.md，然后执行 code-agent/tasks/001a-xxx.md
-4. GPT 完成 001a，填写执行结果
-5. Claude Review 结果，给出 001b 下发指令
-6. ...循环直到功能完成
-```
-
-### 场景二：调试一个已知现象的 bug
+框架同时支持 **GPT**（能力强，token 有限）和 **Gemini**（token 几乎无限）。
+创建任务文件后，用 `/assign-ai` 决定派给谁：
 
 ```
-1. 用户：运行时 crash 在 XX 函数，提供了 stack trace
-2. Claude：
-   - 创建调研任务，要求 GPT 分析调用链并定位根因
-   - 允许插桩
-3. GPT 定位根因，填写结论
-4. Claude：
-   - 基于根因创建修复任务
-   - 明确指出需要修改的代码位置和方式
-5. GPT 实现修复
-6. Claude Review 修复代码
+/assign-ai <task-id 或任务描述>
 ```
 
-### 场景三：核心库 API 变更，适配器需要跟进
+路由规则（简版）：
+
+| 任务类型 | 推荐 AI |
+|---------|---------|
+| 简单调研、联网查资料 | Gemini 优先 |
+| 复杂多步推理、debug、大型实现 | GPT |
+| Gemini 搞不定的 | GPT 重做 |
+
+**`分配给` 字段标注规范**（任务文件头部）：
+
+| 标注 | 含义 |
+|------|------|
+| `本地 GPT` | SuBase-SY 本地 GPT 会话 |
+| `本地 GPT · <仓库名>` | 指定仓库的本地 GPT 会话 |
+| `远端 51 GPT · <仓库名>` | 指定远端机器的 GPT 会话 |
+| `Gemini` | 本地 Gemini（联网） |
+
+### /dispatch — 输出下发指令
 
 ```
-1. 核心库 GPT 完成 API 变更任务，在 changelog 中标注 [PUBLIC]
-2. Claude 检查 changelog，识别 [PUBLIC] 条目
-3. Claude 更新各适配器的知识库对应章节
-4. Claude 为每个适配器创建跟进任务（说明 API 变更细节）
-5. 分别下发给各适配器的 GPT
+/dispatch <task-id>
+```
+
+输出固定格式的下发指令，用户复制后发给对应 AI 会话：
+
+```
+## 下一步（→ 本地 GPT）
+
+请将以下指令发送给 ChatGPT：
+
+> 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
 ```
 
 ---
 
-## 9. 项目管理
+## 10. 项目管理
 
 从 `~/` 启动 Claude 后，用 `/project-add` 和 `/project-remove` 管理哪些项目纳入协调。
 
@@ -510,7 +518,42 @@ Claude 会：
 
 ---
 
-## 10. 常见场景示例
+## 11. 常见场景示例
+
+### 场景一：从零开始一个新功能
+
+```
+1. 用户：我想实现 XX 功能
+2. Claude（/architect）：
+   - 拆分为 3 个子任务：001a（调研）、001b（实现）、001c（验证）
+   - /assign-ai 001a → 派给 Gemini（调研联网）
+3. 用户 → Gemini：请先读取 GEMINI.md，然后执行 code-agent/tasks/001a-xxx.md
+4. Gemini 完成 001a，填写结果
+5. Claude Review，/assign-ai 001b → 派给 GPT（实现）
+6. ...循环直到功能完成
+```
+
+### 场景二：调试一个已知现象的 bug
+
+```
+1. 用户：运行时 crash 在 XX 函数，提供了 stack trace
+2. Claude：
+   - 创建调研任务，/assign-ai → GPT（需要多步推理定位根因）
+   - 允许插桩
+3. GPT 定位根因，填写结论
+4. Claude：基于根因创建修复任务，/dispatch 输出下发指令
+5. GPT 实现修复，Claude Review 修复代码
+```
+
+### 场景三：核心库 API 变更，适配器需要跟进
+
+```
+1. 核心库 GPT 完成 API 变更任务，在 changelog 中标注 [PUBLIC]
+2. Claude 检查 changelog，识别 [PUBLIC] 条目
+3. Claude 更新各适配器的知识库对应章节
+4. Claude 为每个适配器创建跟进任务（说明 API 变更细节）
+5. /assign-ai 分别路由，下发给各适配器的 AI
+```
 
 ### 场景四：新人接手项目
 
