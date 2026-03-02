@@ -53,12 +53,14 @@
 
 ```bash
 git clone <repo-url> ~/claude-agent
-cp -r ~/claude-agent/skills/*       ~/.claude/skills/
-cp    ~/claude-agent/agents/*        ~/.claude/agents/
-cp -r ~/claude-agent/collab-framework ~/.claude/collab-framework
+bash ~/claude-agent/install.sh
 ```
 
+脚本幂等，可重复执行；已有 memory 不覆盖。
+
 ### 初始化新项目
+
+详见 `collab-framework/README.md`，核心是 3 步：
 
 ```bash
 cd /path/to/your-project
@@ -67,11 +69,11 @@ cd /path/to/your-project
 cp ~/.claude/collab-framework/CHATGPT-template.md CHATGPT.md
 # 编辑 CHATGPT.md，替换顶部占位符（作者、公司、项目名、年份）
 
-# 2. 创建协作工作区
-cp -r ~/.claude/collab-framework/code-agent/ code-agent/
+# 2. 配置 Gemini 工作规范（可选，有 Gemini 实例时）
+cp ~/.claude/collab-framework/GEMINI-template.md GEMINI.md
 
-# 可选：创建项目说明
-cp ~/.claude/collab-framework/CLAUDE-template.md CLAUDE.md
+# 3. 创建协作工作区
+cp -r ~/.claude/collab-framework/code-agent/ code-agent/
 ```
 
 ### 开始工作
