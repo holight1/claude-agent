@@ -37,6 +37,7 @@ user-invocable: false
 - `implement`：实现
 - `fix`：修复
 - `continue`：继续前序任务
+- `review`：对照设计文档审查已提交代码（由 GPT 执行）
 
 ### 任务文件必须包含
 - 状态（pending）、分配给（ChatGPT Codex）、创建者（Claude）
