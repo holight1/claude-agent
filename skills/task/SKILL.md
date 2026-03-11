@@ -10,7 +10,7 @@ disable-model-invocation: true
 ## 会话上下文
 
 ```
-!`cat /home/holight/code-agent/.session-context.md`
+!`cat ~/code-agent/.session-context.md`
 ```
 
 ## 指令

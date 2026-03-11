@@ -9,14 +9,14 @@ allowed-tools: ["Read", "Write"]
 
 ## 执行步骤
 
-1. 读取当前 `/home/holight/code-agent/.session-context.md`
+1. 读取当前 `~/code-agent/.session-context.md`
 2. 根据本次会话中的工作进展，更新以下内容：
    - **当前任务**：更新任务名称和描述（如有变化）
    - **根因/进展**：补充新发现或新进展
    - **下一步**：更新为最新的下一步计划
    - **历史任务状态**：更新任务状态表
    - **更新时间**：设置为今天日期
-3. 写回 `/home/holight/code-agent/.session-context.md`
+3. 写回 `~/code-agent/.session-context.md`
 
 ## 格式要求
 
