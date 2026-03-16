@@ -20,24 +20,26 @@ argument-hint: "<task-id>"
 ### 2. 读取任务文件，提取关键字段
 
 - **执行环境**：判断目标 GPT
-  - `本地 GPT` → 本地执行，无需 rsync
-  - `远端 GPT · <仓库名>` → 需 rsync 到远端机器
+  - `本地 GPT` → 本地执行，无需同步
+  - `远端 * GPT · <仓库名>`（如 `远端 21 GPT · SuBase-SY`）→ 需同步到远端机器
 
 - **知识库引用检查**：引用格式应为 `§章节号`（如 §20.10），行号会变不要要求。
   若引用完全缺失章节号则提醒补充。
 
-### 3. 远端任务：rsync 到远端机器
+### 3. 远端任务：同步到远端机器
 
-若 `执行环境` 为 `远端 GPT`，**先查阅 memory 中的 `gpt-registry.md`**
-获取该 GPT 实例的 rsync 目标路径，然后同步任务文件：
+若 `执行环境` 含 `远端`，**先查阅 memory 中的 `gpt-registry.md`**，
+在 dispatch 路由规则表中找到匹配的行，**直接使用表中记录的传输命令**同步任务文件：
 
-```bash
-# 路由规则来自 memory/gpt-registry.md 的 dispatch 路由表，示例：
-# 远端 GPT · <仓库名>  → user@remote-host:/path/to/repo/code-agent/tasks/
-rsync -av <本地任务文件路径> user@remote-host:<远端对应路径>
+路由表示例（实际值见 gpt-registry.md）：
+```
+| `远端 21 GPT · <repo>` | `scp <file> user@host-21:~/<repo>/code-agent/tasks/` | 远端 21 ChatGPT |
+| `远端 152 GPT · <repo>` | `scp -P 22005 <file> user@host-152:~/<repo>/code-agent/tasks/` | 远端 152 ChatGPT |
 ```
 
-确认 rsync 成功后再输出下发指令。
+将 `<file>` 替换为本地任务文件实际路径，执行传输命令。确认成功后再输出下发指令。
+
+> **不要**假设一律用 `rsync`，传输命令以路由表为准（可能是 scp / scp -P / rsync）。
 
 ### 4. AI 选型
 
@@ -72,11 +74,11 @@ rsync -av <本地任务文件路径> user@remote-host:<远端对应路径>
 **远端 GPT 格式：**
 ```
 ---
-## 下一步（→ 远端 GPT · <仓库名>）
+## 下一步（→ 远端 <nickname> GPT · <仓库名>）
 
 **AI：Gemini / GPT 5.3**（理由：一句话）
 
-任务文件已 rsync 到远端。请将以下指令发送给 [Gemini / GPT 5.3]（<仓库名>）：
+任务文件已同步到远端。请将以下指令发送给 [Gemini / GPT 5.3]（<仓库名>）：
 
 > 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<完整文件名>.md
 ```
@@ -86,4 +88,4 @@ rsync -av <本地任务文件路径> user@remote-host:<远端对应路径>
 - 下发指令中的目标（本地 / 远端）必须与任务文件 `执行环境` 字段一致
 - 路由规则从 memory 的 `gpt-registry.md` 读取，不要硬编码主机地址
 - 知识库引用用章节号（§4.5），不要要求行号
-- rsync 失败时报错，不要继续输出下发指令
+- 传输失败时报错，不要继续输出下发指令

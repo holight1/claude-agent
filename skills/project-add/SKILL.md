@@ -1,7 +1,7 @@
 ---
 description: "Add a project to Claude's global management - register in memory with local and optional remote GPT instances"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob"]
-argument-hint: "<project-path> [remote: user@host:remote-path]"
+argument-hint: "<project-path> [remote: user@host:remote-path [server-nickname]]"
 ---
 
 # /project-add - 添加项目到全局管理
@@ -16,9 +16,11 @@ argument-hint: "<project-path> [remote: user@host:remote-path]"
 从用户输入提取：
 - `project-path`：本地项目路径（支持绝对路径或 `~/xxx`）
 - `remote`（可选）：格式 `user@host:remote-path`
+- `server-nickname`（可选）：远端服务器简称，如 `21`、`51`、`152`；未提供则从 host 末段自动推导
 
 派生：
 - `project-name`：`basename(project-path)`
+- 远端 GPT 标注：`远端 <server-nickname> GPT · <project-name>`（例：`远端 21 GPT · SuBase-SY`）
 
 ### 2. 检查并创建项目配置文件
 
@@ -71,7 +73,7 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 **GPT 实例表**：追加行：
 ```
 | `本地 GPT · <project-name>` | <project-name> 本地 | 活跃 |
-| `远端 GPT · <project-name>` | <project-name> 远端 | 活跃 |   ← 仅当有远端
+| `远端 <nickname> GPT · <project-name>` | <project-name> 远端 | 活跃 |   ← 仅当有远端
 ```
 
 **仓库与协作表**：追加行：
@@ -94,28 +96,52 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 
 若有远端，追加：
 ```markdown
-### N+1. 远端 GPT · <project-name>
-- **标注**：`远端 GPT · <project-name>`
+### N+1. 远端 <nickname> GPT · <project-name>
+- **标注**：`远端 <nickname> GPT · <project-name>`
 - **SSH**：`<user@host>`
+- **CHATGPT.md**：`<remote-path>/CHATGPT.md`
 - **任务目录**：`<remote-path>/code-agent/tasks/`
-- **rsync 目标**：`<user@host>:<remote-path>/code-agent/tasks/`
+- **知识库**：`<remote-path>/code-agent/knowledge/`
+- **知识库同步**：GPT 生成的知识文件需 scp 回本地 `<project-path>/code-agent/knowledge/`
 - **状态**：活跃
 ```
 
 同时在 dispatch 路由规则表中追加远端条目（若有远端）：
 ```
-| `远端 GPT · <project-name>` | `<user@host>:<remote-path>/code-agent/tasks/` | 远端 ChatGPT |
+| `远端 <nickname> GPT · <project-name>` | `scp <local-task-file> <user@host>:<remote-path>/code-agent/tasks/` | 远端 ChatGPT |
 ```
 
-### 6. 输出确认
+> **注意传输命令**：标准 SSH 端口用 `scp`，非标准端口用 `scp -P <port>`，无法用 rsync 时同样用 scp。
+> 路由表中直接写完整传输命令，dispatch skill 据此执行。
+
+### 6. 远端初始文件同步
+
+若有远端，注册完成后立即将必要文件同步到远端，避免 GPT 执行任务时缺少上下文：
+
+```bash
+# 确保远端目录结构存在
+ssh <user@host> 'mkdir -p <remote-path>/code-agent/knowledge/design <remote-path>/code-agent/tasks'
+
+# 同步必要 MD 文件（使用路由表中对应的传输命令）
+scp <project-path>/CHATGPT.md <user@host>:<remote-path>/CHATGPT.md
+scp <project-path>/code-agent/ai-collaboration-framework.md \
+    <user@host>:<remote-path>/code-agent/ai-collaboration-framework.md
+scp <project-path>/code-agent/knowledge-base.md \
+    <user@host>:<remote-path>/code-agent/knowledge-base.md  # 若存在
+```
+
+若首次下发的任务引用了设计文档，提醒用户在 `/dispatch` 前手动 scp 对应文件。
+
+### 7. 输出确认
 
 展示注册摘要：
 - 项目名和本地路径
-- 注册的 GPT 实例列表
+- 注册的 GPT 实例列表（含远端标注全名）
+- 远端已同步文件清单
 - 若有缺失文件，给出补全命令
 - 下一步建议：`/architect` 开始设计，或 `/dispatch <task-id>` 下发任务
 
 ## 注意
 
-- **只注册，不创建/修改项目文件**
+- **只注册，不创建/修改项目文件**（远端初始同步除外）
 - 若项目已注册，询问用户是否覆盖
