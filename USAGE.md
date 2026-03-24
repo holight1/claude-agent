@@ -340,7 +340,7 @@ Claude 看到 `[PUBLIC]` 标记后，将相关内容同步更新到各适配器�
 ```markdown
 | 核心库章节 | 适配器A同步目标 | 适配器B同步目标 |
 |-----------|----------------|----------------|
-| §4.3 API  | pytorch/knowledge/05-api.md §3 | ggml/knowledge-base.md §7 |
+| §4.3 API  | pytorch/code-agent/knowledge/05-api.md §3 | ggml/code-agent/knowledge/05-api.md §7 |
 ```
 
 ### 适配器发现核心库 Bug → 上报
@@ -358,7 +358,7 @@ Claude 看到 `[CORE-BUG]` 后，在核心库 `code-agent/tasks/` 创建对应�
 
 Claude 同时管理多个仓库的任务，但每次只给 GPT 一个仓库的一个任务。
 
-**任务状态追踪**（在 Claude 的 memory 中维护，见 `memory/gpt-registry.md`）：
+**任务状态追踪**（在 Claude 的 memory 中维护，见 `gpt-registry.md`）：
 
 ```
 本地 GPT              核心库:   任务 035e 进行中
@@ -394,7 +394,7 @@ rsync -av /path/to/repo/code-agent/tasks/ \
 
 ## 8. 会话管理
 
-Claude Code 使用持久化 memory 系统（`~/.claude/projects/-home-<user>/memory/`）跨会话保持状态，无需手动 save/restore。
+Claude Code 使用持久化 memory 系统（`~/.claude/projects/-home-<user>/memory/`）跨会话保持状态，无需手动操作。
 
 Claude 在任务返回处理（architect skill §任务返回处理 步骤 5）时会自动评估是否有值得保留的发现，并更新对应 memory 文件。
 
