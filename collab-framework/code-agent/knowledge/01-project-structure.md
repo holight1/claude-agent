@@ -7,8 +7,8 @@
 ├── [源码目录]/          # 主要源代码
 ├── code-agent/          # AI 协作工作区
 │   ├── knowledge/       # 知识库（本目录）
-│   ├── tasks/           # 任务文件
-│   └── .session-context.md
+│   ├── designs/         # 设计文档
+│   └── tasks/           # 任务文件
 ├── CHATGPT.md           # GPT 工作配置
 └── CLAUDE.md            # 项目构建/测试说明
 ```

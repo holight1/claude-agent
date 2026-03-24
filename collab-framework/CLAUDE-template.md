@@ -28,6 +28,6 @@
 - GPT 配置：CHATGPT.md
 - 协作协议：code-agent/ai-collaboration-framework.md
 - 知识库：code-agent/knowledge/
-- 会话上下文：code-agent/.session-context.md
+- 设计文档：code-agent/designs/
 - 任务目录：code-agent/tasks/
 - Claude 架构师规范：~/.claude/skills/architect/SKILL.md

@@ -122,14 +122,14 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 
 ```bash
 # 确保远端目录结构存在
-ssh <user@host> 'mkdir -p <remote-path>/code-agent/knowledge/design <remote-path>/code-agent/tasks'
+ssh <user@host> 'mkdir -p <remote-path>/code-agent/knowledge <remote-path>/code-agent/designs <remote-path>/code-agent/tasks'
 
 # 同步必要 MD 文件（使用路由表中对应的传输命令）
 scp <project-path>/CHATGPT.md <user@host>:<remote-path>/CHATGPT.md
 scp <project-path>/code-agent/ai-collaboration-framework.md \
     <user@host>:<remote-path>/code-agent/ai-collaboration-framework.md
-scp <project-path>/code-agent/knowledge-base.md \
-    <user@host>:<remote-path>/code-agent/knowledge-base.md  # 若存在
+scp <project-path>/code-agent/knowledge/README.md \
+    <user@host>:<remote-path>/code-agent/knowledge/README.md  # 若存在
 ```
 
 若首次下发的任务引用了设计文档，提醒用户在 `/dispatch` 前手动 scp 对应文件。

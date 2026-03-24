@@ -542,7 +542,7 @@ Claude 会：
 ```
 1. 安装 claude-agent（见安装章节）
 2. 打开项目目录，启动 Claude Code
-3. /restore  ← 恢复会话上下文，了解项目当前状态
-4. 阅读 code-agent/knowledge/ 了解项目知识
+3. 阅读 code-agent/knowledge/ 了解项目知识（README.md 有主题索引）
+4. /task  ← 查看当前任务状态，了解进行中的工作
 5. 正常工作
 ```

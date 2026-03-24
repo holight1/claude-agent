@@ -18,7 +18,7 @@
 （使用 /project-add 添加项目后自动填充）
 ```
 
-## GPT 实例（详细见 `memory/gpt-registry.md`）
+## GPT 实例（详细见 `gpt-registry.md`）
 
 | 标注 | 仓库/用途 | 状态 |
 |------|----------|------|

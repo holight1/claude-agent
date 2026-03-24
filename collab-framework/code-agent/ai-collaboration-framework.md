@@ -99,7 +99,7 @@
 
 | 设计参考 | 路径 | 章节 |
 |---------|------|------|
-| <设计文档名> | `code-agent/knowledge/design/<file>.md` | 全文 |
+| <设计文档名> | `code-agent/designs/<file>.md` | 全文 |
 
 ## 变更文件清单
 
@@ -139,5 +139,5 @@
 ## 知识库
 
 - 位置：`code-agent/knowledge/`，`README.md` 有主题索引
-- 设计文档：`code-agent/knowledge/design/`
+- 设计文档：`code-agent/designs/`
 - 更新规则：完成任务后若有新发现，更新对应主题文件并在 `10-changelog.md` 追加一行记录

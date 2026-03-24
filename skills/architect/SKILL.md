@@ -122,7 +122,7 @@ Review 时参考 `~/.claude/skills/architect/references/review-checklist.md`（�
 ## 工作流
 
 1. 阅读上下文：CLAUDE.md、code-agent/knowledge/ 相关章节
-2. 设计阶段：将设计文档存入 `code-agent/knowledge/design/<name>.md`
+2. 设计阶段：将设计文档存入 `code-agent/designs/<name>.md`
 3. 任务创建：在 `code-agent/tasks/` 创建任务
 4. 输出执行指令（用 `/dispatch` skill）
 5. Review 阶段：审查代码变更，提供反馈
