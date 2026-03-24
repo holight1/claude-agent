@@ -2,7 +2,7 @@
 
 Claude（设计/协调）+ ChatGPT Codex（编码）+ Gemini（大规模代码分析）的极简可移植模板。
 
-通用 skill（architect/dispatch/task/save/restore/optimize）已全局安装在
+通用 skill（architect/assign-ai/dispatch/task/optimize）已全局安装在
 `~/.claude/skills/`，无需单独配置。
 
 ## 3 步部署新项目
@@ -38,8 +38,6 @@ cp -r ~/.claude/collab-framework/code-agent/ <新项目根目录>/code-agent/
 - `/architect` — 系统设计、任务创建、代码 Review
 - `/dispatch <task-id>` — 下发任务给 GPT
 - `/assign-ai <task-id>` — 选型路由（Gemini vs GPT 5.3）
-- `/save` — 保存会话上下文
-- `/restore` — 恢复会话上下文
 - `/task` — 查看当前任务状态
 - `/optimize` — 归档已完成任务
 

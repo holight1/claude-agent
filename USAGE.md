@@ -394,28 +394,9 @@ rsync -av /path/to/repo/code-agent/tasks/ \
 
 ## 8. 会话管理
 
-Claude Code 会话有 context 限制，以下 skill 帮助跨会话保持状态。
+Claude Code 使用持久化 memory 系统（`~/.claude/projects/-home-<user>/memory/`）跨会话保持状态，无需手动 save/restore。
 
-### /save — 保存进度
-
-在会话末尾或完成一个阶段后使用，更新 `code-agent/.session-context.md`：
-
-```
-/save
-```
-
-保存内容包括：当前任务状态、关键发现、下一步计划。
-
-### /restore — 恢复进度
-
-开启新会话时使用，快速恢复上下文：
-
-```
-/restore
-```
-
-Claude 读取 `.session-context.md` 并展示当前状态，
-无需用户重新描述背景。
+Claude 在任务返回处理（architect skill §任务返回处理 步骤 5）时会自动评估是否有值得保留的发现，并更新对应 memory 文件。
 
 ### /task — 查看任务状态
 
@@ -434,9 +415,8 @@ Claude 读取 `.session-context.md` 并展示当前状态，
 ```
 
 执行后：
-- 已完成任务移入 `code-agent/tasks/archived/`
+- 已完成任务移入 `code-agent/tasks/archive/`
 - 重要发现同步到知识库
-- `.session-context.md` 中的任务表格更新
 
 **建议频率**：每完成 5-10 个任务后运行一次。
 

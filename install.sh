@@ -47,7 +47,8 @@ done
 
 # ── 4. collab-framework ────────────────────────────────────────────────────
 echo "[4/5] Installing collab-framework..."
-cp -r "${REPO_DIR}/collab-framework" "${CLAUDE_DIR}/collab-framework"
+mkdir -p "${CLAUDE_DIR}/collab-framework"
+rsync -a "${REPO_DIR}/collab-framework/" "${CLAUDE_DIR}/collab-framework/"
 echo "  + collab-framework"
 
 # ── 5. Global memory (~/  context) ────────────────────────────────────────
@@ -68,4 +69,4 @@ echo ""
 echo "Next steps:"
 echo "  1. cd ~ && claude          # launch in global coordinator mode"
 echo "  2. /project-add <path>     # register your first project"
-echo "     (auto-creates CHATGPT.md/GEMINI.md symlinks → ~/.claude/roles/)"
+echo "     (copies CHATGPT/GEMINI templates from ~/.claude/collab-framework/)"

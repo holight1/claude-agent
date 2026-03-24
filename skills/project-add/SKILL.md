@@ -30,14 +30,16 @@ ls <project-path>/GEMINI.md  2>/dev/null && echo "OK" || echo "缺失"
 ls <project-path>/code-agent/ 2>/dev/null && echo "OK" || echo "缺失"
 ```
 
-- 若 `CHATGPT.md` 缺失，创建 symlink（不阻止注册）：
+- 若 `CHATGPT.md` 缺失，从模板复制并提示用户填写占位符（不阻止注册）：
   ```bash
-  ln -s ~/.claude/roles/gpt.md <project-path>/CHATGPT.md
+  cp ~/.claude/collab-framework/CHATGPT-template.md <project-path>/CHATGPT.md
   ```
-- 若 `GEMINI.md` 缺失，创建 symlink（不阻止注册）：
+  复制完成后告知用户：需打开 `CHATGPT.md`，替换顶部占位符（[AUTHOR]、[COMPANY]、[PROJECT_SCOPE]、[YEAR]、[TYPECHECK_STATUS]）。
+- 若 `GEMINI.md` 缺失，从模板复制（不阻止注册）：
   ```bash
-  ln -s ~/.claude/roles/gemini.md <project-path>/GEMINI.md
+  cp ~/.claude/collab-framework/GEMINI-template.md <project-path>/GEMINI.md
   ```
+  同样提示用户替换占位符（如模板中有）。
 - 若 `code-agent/` 缺失，复制骨架并替换 ai-collaboration-framework.md 为 symlink（不阻止注册）：
   ```bash
   cp -r ~/.claude/collab-framework/code-agent/ <project-path>/code-agent/

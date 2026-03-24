@@ -36,7 +36,7 @@
 - **两端同步**：rsync `knowledge/` 双向，见核心库 `code-agent/knowledge/00-sync-manifest.md`
 
 ## 协作框架
-- **通用 skill 已全局化**：architect/assign-ai/dispatch/task/save/restore/optimize/project-add/project-remove 在 `~/.claude/skills/`
+- **通用 skill 已全局化**：architect/assign-ai/dispatch/task/optimize/project-add/project-remove 在 `~/.claude/skills/`
 - **新项目模板**：`~/.claude/collab-framework/`（2步部署：CHATGPT.md/GEMINI.md + code-agent/）
 - **typecheck**：已有项目 Claude 自查；新项目第一个调研任务让 GPT 自查；无配置默认不启用
 - 分主题知识见各仓库 `code-agent/knowledge/`（README.md 有索引）

@@ -107,7 +107,12 @@ user-invocable: false
 - 若任务 `执行环境` 含 `远端`，提醒用户将 GPT 更新的知识文件 scp 回本地
 - 同步目标：`<remote-path>/code-agent/knowledge/` → 本地对应路径
 
-### 步骤 5：提交（用户确认后）
+### 步骤 5：检查 memory（轻量）
+- 回顾任务结果：是否有不显而易见的发现、被纠正的行为、或新的架构决策？
+- **是**：更新 `~/.claude/projects/-home-$(whoami)/memory/` 对应 memory 文件（project/feedback/reference 类型）并同步 MEMORY.md 索引
+- **否**：跳过，不写 memory
+
+### 步骤 6：提交（用户确认后）
 - 确认无问题后才提交，不要自动跳到 commit
 
 ## 代码 Review
