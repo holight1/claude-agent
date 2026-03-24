@@ -398,6 +398,17 @@ Claude Code 使用持久化 memory 系统（`~/.claude/projects/-home-<user>/mem
 
 Claude 在任务返回处理（architect skill §任务返回处理 步骤 5）时会自动评估是否有值得保留的发现，并更新对应 memory 文件。
 
+需要深度检查时，显式调用 `/review-task`：
+
+```
+/review-task <task-id>
+```
+
+执行后：
+- 读取任务完成区，提取技术结论
+- 对比并更新 `memory/project_*.md`、`memory/feedback_*.md`、MEMORY.md 索引
+- 按需更新知识库 `10-changelog.md` 和对应章节
+
 ### /task — 查看任务状态
 
 快速查看当前进行中的任务：
