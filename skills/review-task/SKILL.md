@@ -32,7 +32,7 @@ argument-hint: "<task-id>"
 
 若完成区提到修改了源码文件，**必须 review 代码**，再进行 memory 更新。
 
-- 用 `git diff HEAD` 或读取相关文件，查看实际改动
+- 先用 `git status` 了解改动范围（modified + untracked），再按需读取相关文件；不要只依赖 `git diff HEAD`（会漏掉新增的未跟踪文件）
 - **review 范围**：任务修改的所有源码文件均需 review，包括测试脚本、工具脚本等
 - 检查逻辑是否正确、是否与任务设计一致、有无明显 bug
 - 若发现问题，直接告知用户，不要继续写 memory（等用户决定是否返工）
