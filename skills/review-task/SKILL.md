@@ -18,10 +18,27 @@ argument-hint: "<task-id>"
 - `~/a4e_single_core/code-agent/tasks/`
 - 其他仓库
 
-读取任务文件的 **完成区**（`## 完成区` / `## 执行结果` / `## 结论` 等）。
-若任务文件没有完成区，说明结果还没写回，提示用户。
+**找到文件后，先检查 `**执行环境**` 字段是否含 `远端`**：
+- 若是远端任务，**必须先从远端拉取最新版本**，再读取，否则读到的是发出时的旧版本（完成区为空）。
+- 拉取命令从 `gpt-registry.md` 的 dispatch 路由规则中反推：push 命令 `scp [-P port] <file> user@host:remote_path` → pull 命令 `scp [-P port] user@host:remote_path/<file> <local_file>`。
+- 路由表示例（实际从 memory 读取）：
+  - `远端 B GPT · repo-name` → `scp [-P port] user@host-B:~/repo-name/code-agent/tasks/<file> ~/repo-name/code-agent/tasks/<file>`
+- 拉取失败时报错，不继续。
 
-### 2. 判断需要更新哪些文件
+读取任务文件的 **完成区**（`## 完成区` / `## 执行结果` / `## 结论` 等）。
+若任务文件没有完成区内容（仍是模板占位），说明结果还没写回，提示用户。
+
+### 2. 代码 Review（若任务有代码改动）
+
+若完成区提到修改了源码文件，**必须 review 代码**，再进行 memory 更新。
+
+- 用 `git diff HEAD` 或读取相关文件，查看实际改动
+- **review 范围**：任务修改的所有源码文件均需 review，包括测试脚本、工具脚本等
+- 检查逻辑是否正确、是否与任务设计一致、有无明显 bug
+- 若发现问题，直接告知用户，不要继续写 memory（等用户决定是否返工）
+- 若代码无问题，在后续 memory 更新中注明"代码已 review"
+
+### 3. 判断需要更新哪些文件
 
 对照完成区内容，逐一检查：
 

@@ -35,8 +35,13 @@
 
 ## 前置知识
 
-- `code-agent/knowledge/<文件>.md` — §X.X
+**此 section 必填，不可省略。**
+
+- `code-agent/knowledge/<文件>.md` — §X.X   ← Claude 已知章节时直接填
+- 关键词：`<keyword1>`、`<keyword2>`         ← Claude 不确定时填关键词，GPT 自行在 knowledge/ 中搜索定位
 - 任务 <编号> 完成区（已确认的结论）
+
+GPT 执行前须先读完前置知识中列出的所有章节，或搜索定位后再阅读，确认背景后再开始任务。
 
 ## 任务内容
 
