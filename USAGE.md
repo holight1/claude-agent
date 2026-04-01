@@ -431,6 +431,28 @@ Claude 在任务返回处理（architect skill §任务返回处理 步骤 5）�
 
 **建议频率**：每完成 5-10 个任务后运行一次。
 
+### 框架仓库自动同步规则
+
+**框架仓库**：`~/claude-agent`（本仓库）
+
+凡修改以下文件后，Claude **必须立即**同步到框架仓库并 push，**无需用户确认**：
+
+| 修改的文件 | 同步到 claude-agent 的路径 |
+|-----------|--------------------------|
+| `~/.claude/skills/*/SKILL.md` | `skills/*/SKILL.md` |
+| `~/.claude/hooks/**` | `hooks/**` |
+
+```bash
+# 标准同步流程（skill 修改为例）
+cp ~/.claude/skills/<name>/SKILL.md ~/claude-agent/skills/<name>/SKILL.md
+cd ~/claude-agent
+git add skills/<name>/SKILL.md
+git commit -m "fix(<name>): 描述改动"
+git push origin main   # 框架仓库直接 push，无需用户确认
+```
+
+> **注意**：项目仓库（SuBase-SY、gem5-a4e 等）的 push 仍须用户确认。只有 `claude-agent` 框架仓库例外。
+
 ---
 
 ## 9. AI 选型与下发
