@@ -20,7 +20,7 @@ argument-hint: "<project-path> [remote: user@host:remote-path [server-nickname]]
 
 派生：
 - `project-name`：`basename(project-path)`
-- 远端 GPT 标注：`远端 <server-nickname> GPT · <project-name>`（例：`远端 21 GPT · SuBase-SY`）
+- 远端 GPT 标注：`远端 <server-nickname> GPT · <project-name>`（例：`远端 21 GPT · <repo-name>`）
 
 ### 2. 检查并创建项目配置文件
 

@@ -13,9 +13,9 @@ argument-hint: "<task-id>"
 ### 1. 找到并读取任务文件
 
 在所有仓库的 `code-agent/tasks/` 中搜索 `<task-id>*.md`，优先查：
-- `~/SuBase-SY/code-agent/tasks/`
-- `~/gem5-a4e/code-agent/tasks/`
-- `~/a4e_single_core/code-agent/tasks/`
+- `~/<project-A>/code-agent/tasks/`
+- `~/<project-B>/code-agent/tasks/`
+- `~/<project-C>/code-agent/tasks/`
 - 其他仓库
 
 **找到文件后，先检查 `**执行环境**` 字段是否含 `远端`**：

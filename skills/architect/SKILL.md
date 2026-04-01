@@ -53,7 +53,7 @@ user-invocable: false
 
 ```markdown
 **执行环境**：本地 GPT · <仓库名>
-**执行环境**：远端 <nickname> GPT · <仓库名>   # 如：远端 21 GPT · SuBase-SY
+**执行环境**：远端 <nickname> GPT · <仓库名>   # 如：远端 21 GPT · <repo-name>
 ```
 
 下发指令末尾必须标注目标 GPT：

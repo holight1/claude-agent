@@ -51,6 +51,41 @@ mkdir -p "${CLAUDE_DIR}/collab-framework"
 rsync -a "${REPO_DIR}/collab-framework/" "${CLAUDE_DIR}/collab-framework/"
 echo "  + collab-framework"
 
+# ── 4b. Claude Code hooks (PostToolUse / PreToolUse) ──────────────────────
+echo "[4b] Installing Claude Code hooks..."
+mkdir -p "${CLAUDE_DIR}/hooks"
+for f in "${REPO_DIR}/hooks"/*.sh; do
+    [ -f "$f" ] || continue
+    cp "$f" "${CLAUDE_DIR}/hooks/"
+    chmod +x "${CLAUDE_DIR}/hooks/$(basename "$f")"
+    echo "  + $(basename "$f")"
+done
+
+# ── 4c. Git hooks (pre-commit etc.) ───────────────────────────────────────
+if [ -d "${REPO_DIR}/hooks/git" ]; then
+    echo "[4c] Installing git hooks into $(pwd)/.git/hooks/ ..."
+    # Install into the caller's current git repo (if any)
+    if git -C "${PWD}" rev-parse --git-dir &>/dev/null; then
+        GIT_HOOK_DIR="$(git -C "${PWD}" rev-parse --git-dir)/hooks"
+        for f in "${REPO_DIR}/hooks/git"/*; do
+            [ -f "$f" ] || continue
+            cp "$f" "${GIT_HOOK_DIR}/"
+            chmod +x "${GIT_HOOK_DIR}/$(basename "$f")"
+            echo "  + $(basename "$f") → ${GIT_HOOK_DIR}/"
+        done
+    else
+        echo "  ~ Not inside a git repo, skipping git hooks"
+    fi
+    # Also self-install into claude-agent repo
+    SELF_GIT_HOOK_DIR="${REPO_DIR}/.git/hooks"
+    for f in "${REPO_DIR}/hooks/git"/*; do
+        [ -f "$f" ] || continue
+        cp "$f" "${SELF_GIT_HOOK_DIR}/"
+        chmod +x "${SELF_GIT_HOOK_DIR}/$(basename "$f")"
+    done
+    echo "  + self-installed into claude-agent .git/hooks/"
+fi
+
 # ── 5. Global memory (~/  context) ────────────────────────────────────────
 echo "[5/5] Global memory (~/  context)..."
 if [ ! -d "${MEMORY_DIR}" ]; then

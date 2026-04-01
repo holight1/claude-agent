@@ -451,7 +451,7 @@ git commit -m "fix(<name>): 描述改动"
 git push origin main   # 框架仓库直接 push，无需用户确认
 ```
 
-> **注意**：项目仓库（SuBase-SY、gem5-a4e 等）的 push 仍须用户确认。只有 `claude-agent` 框架仓库例外。
+> **注意**：项目仓库（业务代码仓库）的 push 仍须用户确认。只有 `claude-agent` 框架仓库例外。
 
 ---
 
@@ -478,7 +478,7 @@ git push origin main   # 框架仓库直接 push，无需用户确认
 
 | 标注 | 含义 |
 |------|------|
-| `本地 GPT` | SuBase-SY 本地 GPT 会话 |
+| `本地 GPT` | 主项目本地 GPT 会话 |
 | `本地 GPT · <仓库名>` | 指定仓库的本地 GPT 会话 |
 | `远端 51 GPT · <仓库名>` | 指定远端机器的 GPT 会话 |
 | `Gemini` | 本地 Gemini（联网） |
