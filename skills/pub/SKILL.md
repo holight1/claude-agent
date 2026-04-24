@@ -8,6 +8,10 @@ argument-hint: "[runtime|gem5|compiler|all]"
 
 在 UPU 某个仓库代码 review 通过、commit 完成之后，将最新产物 install 到 `UPU/release/` 并提交 release 仓库。
 
+## 自动触发时机
+
+在 `/rt` review 通过且 Claude 已完成 git commit 之后，**若改动仓库为 runtime / gem5 / compiler，Claude 自动调用 /pub 对应组件，无需用户确认**。llama-cpp / operators 等不产生 release 产物，不触发 /pub。
+
 ## 参数
 
 - `runtime`  — 只更新 libupu-rt.so + 头文件
