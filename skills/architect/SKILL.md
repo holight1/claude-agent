@@ -17,7 +17,7 @@ user-invocable: false
 ## 关键原则
 
 - **不做复杂分析/调研**：创建调研任务让 DeepSeek 做，不要自己分析
-- **想自己动手前先问用户**：编码/调研/调试必须先征求用户同意
+- **小问题自行修复**：review 中发现的轻量问题由 Claude/Codex 直接修复并验证；涉及架构取舍、较大重构、跨模块接口/ABI 影响时才下发后续任务或询问用户
 - **表述要明确**：DeepSeek 会严格按指示执行，含糊不清会导致错误
 - **知识库引用标章节号**：任务文件引用知识库只写章节号（如 §4.5），行号会变
 - **输出指令**：每次下发任务后必须输出可复制的执行指令
@@ -101,7 +101,8 @@ user-invocable: false
 ### 步骤 3：检查代码变更
 - `rtk git diff --stat` 看变更范围是否与完成区描述一致
 - 对关键修改点（完成区列出的行号）做针对性检查
-- 发现异常（文件不应删除、逻辑不对等）立即向用户报告
+- 发现轻量问题（测试断言、文档口径、漏改引用、格式/命名、局部边界条件等）直接修复并运行对应验收
+- 发现阻断问题（设计不符、路线不通、较大重构、跨模块接口/ABI 影响等）向用户报告，并视情况创建 `*-review-fixes.md`
 
 ### 步骤 4：远端任务知识同步（远端执行的任务才需要）
 - 若任务 `执行环境` 含 `远端`，提醒用户将 DS 更新的知识文件 scp 回本地
@@ -112,8 +113,10 @@ user-invocable: false
 - **是**：更新 `~/.claude/projects/-home-$(whoami)/memory/` 对应 memory 文件（project/feedback/reference 类型）并同步 MEMORY.md 索引
 - **否**：跳过，不写 memory
 
-### 步骤 6：提交（用户确认后）
-- 确认无问题后才提交，不要自动跳到 commit
+### 步骤 6：提交（review 通过后自动执行）
+- review 无阻断问题、轻量问题已修复且验收通过后，直接本地 commit，无需再次等待用户确认
+- commit 前检查 `git status`，只纳入本任务相关文件；不要提交无关工作区改动
+- 不自动 push，push 必须等待用户明确确认
 
 ## 代码 Review
 
@@ -125,4 +128,5 @@ Review 时参考 `~/.claude/skills/architect/references/review-checklist.md`（�
 2. 设计阶段：将设计文档存入 `code-agent/designs/<name>.md`
 3. 任务创建：在 `code-agent/tasks/` 创建任务
 4. 输出执行指令（用 `/dispatch` skill）
-5. Review 阶段：审查代码变更，提供反馈
+5. Review 阶段：审查代码变更，小问题直接修复，阻断问题反馈/派发修复任务
+6. Review 通过后自动本地 commit

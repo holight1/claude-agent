@@ -30,7 +30,8 @@
   → /assign-ai 决定派给 DS 还是 Gemini
   → 用户将任务指令发给对应 AI
   → AI 执行任务、填写结果
-  → Claude Review 结果、决定下一步
+  → Claude Review 结果，小问题直接修复
+  → Review 通过后自动本地 commit
 ```
 
 **为什么这样分工？**
@@ -43,7 +44,8 @@
 
 - AI 每次必须先读 `DS.md`（或 `GEMINI.md`），获取项目规范
 - 每个任务文件是独立的，AI 不依赖之前任务的记忆
-- Claude 不自己写代码，调研复杂问题也交给 DS / Gemini
+- Claude 不做复杂实现/调研；review 中的轻量修复可直接处理
+- Review 无阻断问题且验收通过后，Claude 自动本地 commit；不自动 push
 
 ---
 

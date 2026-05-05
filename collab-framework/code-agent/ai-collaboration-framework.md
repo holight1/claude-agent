@@ -3,7 +3,7 @@
 ## 协作流程
 
 ```
-用户需求 → Claude 创建任务 → DS 执行 → Claude Review → 完成/返工
+用户需求 → Claude 创建任务 → DS 执行 → Claude Review → 小问题自修/大问题返工 → 自动提交
 ```
 
 ## 任务文件规范
@@ -146,3 +146,11 @@ DS 执行前须先读完前置知识中列出的所有章节，或搜索定位�
 - 位置：`code-agent/knowledge/`，`README.md` 有主题索引
 - 设计文档：`code-agent/designs/`
 - 更新规则：完成任务后若有新发现，更新对应主题文件并在 `10-changelog.md` 追加一行记录
+
+## Review 与提交规则
+
+- DS/Gemini 不做 commit；Claude/Codex review 通过后负责本地 commit
+- review 中发现的轻量问题由 Claude/Codex 直接修复并验证，包括测试断言、文档口径、漏改引用、格式/命名、局部边界条件等
+- 涉及设计不符、路线不通、较大重构、跨模块接口/ABI 影响的问题，不直接修；需要向用户说明，并按需创建 `*-review-fixes.md`
+- review 无阻断问题、轻量问题已修复且验收通过后，自动本地 commit，无需再次等待用户确认
+- 不自动 push；push 必须等待用户明确确认
