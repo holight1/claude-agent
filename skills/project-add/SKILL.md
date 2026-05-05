@@ -1,5 +1,5 @@
 ---
-description: "Add a project to Claude's global management - register in memory with local and optional remote GPT instances"
+description: "Add a project to Claude's global management - register in memory with local and optional remote DS instances"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob"]
 argument-hint: "<project-path> [remote: user@host:remote-path [server-nickname]]"
 ---
@@ -20,21 +20,21 @@ argument-hint: "<project-path> [remote: user@host:remote-path [server-nickname]]
 
 派生：
 - `project-name`：`basename(project-path)`
-- 远端 GPT 标注：`远端 <server-nickname> GPT · <project-name>`（例：`远端 21 GPT · <repo-name>`）
+- 远端 DS 标注：`远端 <server-nickname> DS · <project-name>`（例：`远端 21 DS · <repo-name>`）
 
 ### 2. 检查并创建项目配置文件
 
 ```bash
-ls <project-path>/CHATGPT.md 2>/dev/null && echo "OK" || echo "缺失"
+ls <project-path>/DS.md 2>/dev/null && echo "OK" || echo "缺失"
 ls <project-path>/GEMINI.md  2>/dev/null && echo "OK" || echo "缺失"
 ls <project-path>/code-agent/ 2>/dev/null && echo "OK" || echo "缺失"
 ```
 
-- 若 `CHATGPT.md` 缺失，从模板复制并提示用户填写占位符（不阻止注册）：
+- 若 `DS.md` 缺失，从模板复制并提示用户填写占位符（不阻止注册）：
   ```bash
-  cp ~/.claude/collab-framework/CHATGPT-template.md <project-path>/CHATGPT.md
+  cp ~/.claude/collab-framework/DS-template.md <project-path>/DS.md
   ```
-  复制完成后告知用户：需打开 `CHATGPT.md`，替换顶部占位符（[AUTHOR]、[COMPANY]、[PROJECT_SCOPE]、[YEAR]、[TYPECHECK_STATUS]）。
+  复制完成后告知用户：需打开 `DS.md`，替换顶部占位符（[AUTHOR]、[COMPANY]、[PROJECT_SCOPE]、[YEAR]、[TYPECHECK_STATUS]）。
 - 若 `GEMINI.md` 缺失，从模板复制（不阻止注册）：
   ```bash
   cp ~/.claude/collab-framework/GEMINI-template.md <project-path>/GEMINI.md
@@ -59,7 +59,7 @@ ls <project-path>/code-agent/ 2>/dev/null && echo "OK" || echo "缺失"
 MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 ```
 
-读取 `${MEMORY_DIR}/MEMORY.md` 和 `${MEMORY_DIR}/gpt-registry.md`。
+读取 `${MEMORY_DIR}/MEMORY.md` 和 `${MEMORY_DIR}/ds-registry.md`。
 
 若项目已存在于 memory，提示用户并询问是否覆盖，不覆盖则退出。
 
@@ -72,10 +72,10 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 └── 远端   <user@host:remote-path>
 ```
 
-**GPT 实例表**：追加行：
+**DS 实例表**：追加行：
 ```
-| `本地 GPT · <project-name>` | <project-name> 本地 | 活跃 |
-| `远端 <nickname> GPT · <project-name>` | <project-name> 远端 | 活跃 |   ← 仅当有远端
+| `本地 DS · <project-name>` | <project-name> 本地 | 活跃 |
+| `远端 <nickname> DS · <project-name>` | <project-name> 远端 | 活跃 |   ← 仅当有远端
 ```
 
 **仓库与协作表**：追加行：
@@ -83,14 +83,14 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 | <project-name> | `<project-path>` | `<remote>` 或 — | 进行中 |
 ```
 
-### 5. 更新 gpt-registry.md
+### 5. 更新 ds-registry.md
 
 在"当前活跃实例"区末尾追加（N 为下一个序号）：
 
 ```markdown
-### N. 本地 GPT · <project-name>
-- **标注**：`本地 GPT · <project-name>`
-- **CHATGPT.md**：`<project-path>/CHATGPT.md`
+### N. 本地 DS · <project-name>
+- **标注**：`本地 DS · <project-name>`
+- **DS.md**：`<project-path>/DS.md`
 - **任务目录**：`<project-path>/code-agent/tasks/`
 - **知识库**：`<project-path>/code-agent/knowledge/`
 - **状态**：活跃
@@ -98,19 +98,19 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 
 若有远端，追加：
 ```markdown
-### N+1. 远端 <nickname> GPT · <project-name>
-- **标注**：`远端 <nickname> GPT · <project-name>`
+### N+1. 远端 <nickname> DS · <project-name>
+- **标注**：`远端 <nickname> DS · <project-name>`
 - **SSH**：`<user@host>`
-- **CHATGPT.md**：`<remote-path>/CHATGPT.md`
+- **DS.md**：`<remote-path>/DS.md`
 - **任务目录**：`<remote-path>/code-agent/tasks/`
 - **知识库**：`<remote-path>/code-agent/knowledge/`
-- **知识库同步**：GPT 生成的知识文件需 scp 回本地 `<project-path>/code-agent/knowledge/`
+- **知识库同步**：DS 生成的知识文件需 scp 回本地 `<project-path>/code-agent/knowledge/`
 - **状态**：活跃
 ```
 
 同时在 dispatch 路由规则表中追加远端条目（若有远端）：
 ```
-| `远端 <nickname> GPT · <project-name>` | `scp <local-task-file> <user@host>:<remote-path>/code-agent/tasks/` | 远端 ChatGPT |
+| `远端 <nickname> DS · <project-name>` | `scp <local-task-file> <user@host>:<remote-path>/code-agent/tasks/` | 远端 DeepSeek |
 ```
 
 > **注意传输命令**：标准 SSH 端口用 `scp`，非标准端口用 `scp -P <port>`，无法用 rsync 时同样用 scp。
@@ -118,14 +118,14 @@ MEMORY_DIR="${HOME}/.claude/projects/-home-$(whoami)/memory"
 
 ### 6. 远端初始文件同步
 
-若有远端，注册完成后立即将必要文件同步到远端，避免 GPT 执行任务时缺少上下文：
+若有远端，注册完成后立即将必要文件同步到远端，避免 DS 执行任务时缺少上下文：
 
 ```bash
 # 确保远端目录结构存在
 ssh <user@host> 'mkdir -p <remote-path>/code-agent/knowledge <remote-path>/code-agent/designs <remote-path>/code-agent/tasks'
 
 # 同步必要 MD 文件（使用路由表中对应的传输命令）
-scp <project-path>/CHATGPT.md <user@host>:<remote-path>/CHATGPT.md
+scp <project-path>/DS.md <user@host>:<remote-path>/DS.md
 scp <project-path>/code-agent/ai-collaboration-framework.md \
     <user@host>:<remote-path>/code-agent/ai-collaboration-framework.md
 scp <project-path>/code-agent/knowledge/README.md \
@@ -138,7 +138,7 @@ scp <project-path>/code-agent/knowledge/README.md \
 
 展示注册摘要：
 - 项目名和本地路径
-- 注册的 GPT 实例列表（含远端标注全名）
+- 注册的 DS 实例列表（含远端标注全名）
 - 远端已同步文件清单
 - 若有缺失文件，给出补全命令
 - 下一步建议：`/architect` 开始设计，或 `/dispatch <task-id>` 下发任务

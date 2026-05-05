@@ -23,9 +23,9 @@
 - 命名：函数与变量 snake_case，宏大写
 - 花括号：函数定义换行，控制语句 K&R
 
-## GPT Collaboration
+## DS Collaboration
 
-- GPT 配置：CHATGPT.md
+- DS 配置：DS.md
 - 协作协议：code-agent/ai-collaboration-framework.md
 - 知识库：code-agent/knowledge/
 - 设计文档：code-agent/designs/

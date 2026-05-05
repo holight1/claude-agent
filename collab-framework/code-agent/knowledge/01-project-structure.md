@@ -9,7 +9,7 @@
 │   ├── knowledge/       # 知识库（本目录）
 │   ├── designs/         # 设计文档
 │   └── tasks/           # 任务文件
-├── CHATGPT.md           # GPT 工作配置
+├── DS.md           # DS 工作配置
 └── CLAUDE.md            # 项目构建/测试说明
 ```
 

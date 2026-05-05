@@ -6,7 +6,7 @@ argument-hint: "<task-id>"
 
 # /review-task <task-id> - 任务返回后更新 memory 和本地 MD
 
-任务从 GPT/Gemini 返回后，检查是否有新发现需要写入 memory 或知识库。
+任务从 DS/Gemini 返回后，检查是否有新发现需要写入 memory 或知识库。
 
 ## 执行步骤
 
@@ -20,9 +20,9 @@ argument-hint: "<task-id>"
 
 **找到文件后，先检查 `**执行环境**` 字段是否含 `远端`**：
 - 若是远端任务，**必须先从远端拉取最新版本**，再读取，否则读到的是发出时的旧版本（完成区为空）。
-- 拉取命令从 `gpt-registry.md` 的 dispatch 路由规则中反推：push 命令 `scp [-P port] <file> user@host:remote_path` → pull 命令 `scp [-P port] user@host:remote_path/<file> <local_file>`。
+- 拉取命令从 `ds-registry.md` 的 dispatch 路由规则中反推：push 命令 `scp [-P port] <file> user@host:remote_path` → pull 命令 `scp [-P port] user@host:remote_path/<file> <local_file>`。
 - 路由表示例（实际从 memory 读取）：
-  - `远端 B GPT · repo-name` → `scp [-P port] user@host-B:~/repo-name/code-agent/tasks/<file> ~/repo-name/code-agent/tasks/<file>`
+  - `远端 B DS · repo-name` → `scp [-P port] user@host-B:~/repo-name/code-agent/tasks/<file> ~/repo-name/code-agent/tasks/<file>`
 - 拉取失败时报错，不继续。
 
 读取任务文件的 **完成区**（`## 完成区` / `## 执行结果` / `## 结论` 等）。
@@ -60,7 +60,7 @@ argument-hint: "<task-id>"
 
 **E. 10-changelog.md**
 - 若任务对仓库代码有实质改动，在对应仓库的 `code-agent/knowledge/10-changelog.md`
-  添加一行记录（格式：`| 日期 | 描述 | GPT/Claude |`）
+  添加一行记录（格式：`| 日期 | 描述 | DS/Claude |`）
 
 | 有新发现 | 推翻旧结论 | 操作 |
 |---------|----------|------|

@@ -1,6 +1,6 @@
 # 使用指南
 
-本文档说明如何使用 Claude + ChatGPT Codex 协作框架完成实际开发工作。
+本文档说明如何使用 Claude + DeepSeek 协作框架完成实际开发工作。
 
 ---
 
@@ -22,12 +22,12 @@
 
 ## 1. 核心思路
 
-**分工**：Claude 负责设计和协调，GPT / Gemini 负责编码和调研。
+**分工**：Claude 负责设计和协调，DS / Gemini 负责编码和调研。
 
 ```
 用户需求
   → Claude 分析、拆解、创建任务文件
-  → /assign-ai 决定派给 GPT 还是 Gemini
+  → /assign-ai 决定派给 DS 还是 Gemini
   → 用户将任务指令发给对应 AI
   → AI 执行任务、填写结果
   → Claude Review 结果、决定下一步
@@ -36,14 +36,14 @@
 **为什么这样分工？**
 
 - Claude 有完整的对话上下文，适合做设计决策和任务拆解
-- GPT / Gemini 每次从零开始，适合聚焦单一任务的编码执行
+- DS / Gemini 每次从零开始，适合聚焦单一任务的编码执行
 - 任务文件是两者之间的"合同"，清晰定义输入和输出
 
 **关键约束**：
 
-- AI 每次必须先读 `CHATGPT.md`（或 `GEMINI.md`），获取项目规范
+- AI 每次必须先读 `DS.md`（或 `GEMINI.md`），获取项目规范
 - 每个任务文件是独立的，AI 不依赖之前任务的记忆
-- Claude 不自己写代码，调研复杂问题也交给 GPT / Gemini
+- Claude 不自己写代码，调研复杂问题也交给 DS / Gemini
 
 ---
 
@@ -65,9 +65,9 @@ bash ~/claude-agent/install.sh
 ```bash
 cd /path/to/your-project
 
-# 1. 配置 GPT 工作规范
-cp ~/.claude/collab-framework/CHATGPT-template.md CHATGPT.md
-# 编辑 CHATGPT.md，替换顶部占位符（作者、公司、项目名、年份）
+# 1. 配置 DS 工作规范
+cp ~/.claude/collab-framework/DS-template.md DS.md
+# 编辑 DS.md，替换顶部占位符（作者、公司、项目名、年份）
 
 # 2. 配置 Gemini 工作规范（可选，有 Gemini 实例时）
 cp ~/.claude/collab-framework/GEMINI-template.md GEMINI.md
@@ -86,7 +86,7 @@ claude
 ```
 
 从 `~/` 启动时，memory 存储在 `~/.claude/projects/-home-<user>/memory/`，
-跨项目全局共享，Claude 可同时协调多个仓库的 GPT 任务。
+跨项目全局共享，Claude 可同时协调多个仓库的 DS 任务。
 Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录。
 
 使用 `/architect` 激活架构师模式开始设计工作。
@@ -95,14 +95,14 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 
 ## 3. 下发调研任务
 
-调研任务用于让 GPT **读代码、查资料、回答具体问题**，不要求写代码。
+调研任务用于让 DS **读代码、查资料、回答具体问题**，不要求写代码。
 
 ### 何时使用调研任务
 
-- 不了解某个模块的实现方式，需要 GPT 读源码并总结
+- 不了解某个模块的实现方式，需要 DS 读源码并总结
 - 需要确认某个 API 的正确用法（参数、返回值、约束）
-- 遇到 bug，需要 GPT 分析调用链和根因
-- 技术选型前，需要 GPT 对比多种方案
+- 遇到 bug，需要 DS 分析调用链和根因
+- 技术选型前，需要 DS 对比多种方案
 
 ### 创建调研任务
 
@@ -112,22 +112,22 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 **调研任务的关键要素**：
 
 1. **具体问题**：禁止模糊目标（如"了解 XX 模块"），必须是可验证的具体问题
-2. **知识库引用**：列出相关章节和行号范围，节省 GPT context
+2. **知识库引用**：列出相关章节和行号范围，节省 DS context
 3. **调研范围**：指定需要分析的文件列表
-4. **输出格式**：明确要求 GPT 给出代码位置和行号
+4. **输出格式**：明确要求 DS 给出代码位置和行号
 
 **示例**：
 
-> **用户**：我想知道 serverd 守护进程是怎么初始化设备的，让 GPT 调研一下。
+> **用户**：我想知道 serverd 守护进程是怎么初始化设备的，让 DS 调研一下。
 >
 > **Claude**：（创建任务文件 `041-research-serverd-init.md`，内容包含：需要分析的文件路径、
 > 具体问题列表、知识库相关章节行号）
 >
-> **下发指令**：`请先读取 CHATGPT.md，然后执行 code-agent/tasks/041-research-serverd-init.md`
+> **下发指令**：`请先读取 DS.md，然后执行 code-agent/tasks/041-research-serverd-init.md`
 
 ### 允许插桩的调研
 
-对于运行时行为分析（如调用顺序、数据流向），可在任务中允许 GPT 插桩：
+对于运行时行为分析（如调用顺序、数据流向），可在任务中允许 DS 插桩：
 
 ```markdown
 **调试选项**：允许插桩
@@ -139,7 +139,7 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 
 ## 4. 下发开发任务
 
-开发任务要求 GPT **修改或新建代码**，需要比调研任务更精确的规格说明。
+开发任务要求 DS **修改或新建代码**，需要比调研任务更精确的规格说明。
 
 ### 何时使用开发任务
 
@@ -160,7 +160,7 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 
 ### 开发任务的关键要素
 
-1. **明确的文件变更清单**：GPT 需要新建/修改哪些文件
+1. **明确的文件变更清单**：DS 需要新建/修改哪些文件
 2. **接口定义**：函数签名、结构体定义（带注释）
 3. **实现步骤**：有序、原子化、可独立验证
 4. **验证方法**：如何确认实现正确（命令、期望输出）
@@ -189,14 +189,14 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 ```
 ## 下一步（→ [目标 AI 标识]）
 
-请将以下指令发送给 ChatGPT / Gemini：
+请将以下指令发送给 DeepSeek / Gemini：
 
-> 请先读取 CHATGPT.md（或 GEMINI.md），然后执行 code-agent/tasks/<文件名>.md
+> 请先读取 DS.md（或 GEMINI.md），然后执行 code-agent/tasks/<文件名>.md
 ```
 
 **目标 AI 标识示例**：
-- `→ 本地 GPT`
-- `→ 远端 51 GPT · <仓库名>`
+- `→ 本地 DS`
+- `→ 远端 51 DS · <仓库名>`
 - `→ Gemini`
 
 多仓库并行时每条指令前都必须有标注，用户一眼看清发给哪个会话。
@@ -213,7 +213,7 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 # 任务：<编号> — <标题>
 
 **状态**：pending
-**分配给**：[本地 GPT / 本地 GPT · <仓库名> / 远端 51 GPT · <仓库名> / Gemini]
+**分配给**：[本地 DS / 本地 DS · <仓库名> / 远端 51 DS · <仓库名> / Gemini]
 **创建者**：Claude
 **执行环境**：[本地 / 远端 user@host · 项目名]
 **前置任务**：<编号> 完成后执行（无则删除此行）
@@ -273,7 +273,7 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 
 ## 6. 知识库管理
 
-知识库是 Claude 和 GPT 之间共享的持久化信息，存放在 `code-agent/knowledge/`。
+知识库是 Claude 和 DS 之间共享的持久化信息，存放在 `code-agent/knowledge/`。
 
 ### 组织原则
 
@@ -290,20 +290,20 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 | 架构决策及原因 | 推测性结论 |
 | 关键数据结构定义 | 单次使用的脚本 |
 
-### GPT 使用知识库的规范
+### DS 使用知识库的规范
 
-任务文件中引用知识库**必须标行号范围**，减少 GPT 加载无关内容：
+任务文件中引用知识库**必须标行号范围**，减少 DS 加载无关内容：
 
 ```markdown
 ## 前置知识
 - `code-agent/knowledge/04-api-reference.md` §4.3（L136-L180）— suKernelSetArgs 参数语义
 ```
 
-不要写 `阅读整个知识库`，GPT context 有限。
+不要写 `阅读整个知识库`，DS context 有限。
 
 ### 知识库同步时机
 
-- GPT 完成任务后，要求其将新发现更新到相关知识库章节
+- DS 完成任务后，要求其将新发现更新到相关知识库章节
 - 任务文件归档（`/optimize`）前检查知识库是否已同步
 
 ---
@@ -322,8 +322,8 @@ Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录�
 [适配器B]  如 GGML 后端
 ```
 
-每个仓库独立维护自己的 `CHATGPT.md` + `code-agent/`，
-GPT 分配到具体仓库工作，不跨仓库操作。
+每个仓库独立维护自己的 `DS.md` + `code-agent/`，
+DS 分配到具体仓库工作，不跨仓库操作。
 
 ### 核心库变更 → 同步到适配器
 
@@ -356,17 +356,17 @@ Claude 看到 `[CORE-BUG]` 后，在核心库 `code-agent/tasks/` 创建对应�
 
 ### 多仓库任务分配
 
-Claude 同时管理多个仓库的任务，但每次只给 GPT 一个仓库的一个任务。
+Claude 同时管理多个仓库的任务，但每次只给 DS 一个仓库的一个任务。
 
-**任务状态追踪**（在 Claude 的 memory 中维护，见 `gpt-registry.md`）：
+**任务状态追踪**（在 Claude 的 memory 中维护，见 `ds-registry.md`）：
 
 ```
-本地 GPT              核心库:   任务 035e 进行中
-本地 GPT · <仓库A>    适配器A:  任务 009  进行中
-远端 GPT · <仓库B>    适配器B:  任务 049  进行中
+本地 DS              核心库:   任务 035e 进行中
+本地 DS · <仓库A>    适配器A:  任务 009  进行中
+远端 DS · <仓库B>    适配器B:  任务 049  进行中
 ```
 
-不同 GPT 会话的任务可以并行；同一 GPT 会话内任务必须串行。
+不同 DS 会话的任务可以并行；同一 DS 会话内任务必须串行。
 
 ### 远端机器上的仓库
 
@@ -457,9 +457,9 @@ git push origin main   # 框架仓库直接 push，无需用户确认
 
 ## 9. AI 选型与下发
 
-### /assign-ai — 路由到 GPT 或 Gemini
+### /assign-ai — 路由到 DS 或 Gemini
 
-框架同时支持 **GPT**（能力强，token 有限）和 **Gemini**（token 几乎无限）。
+框架同时支持 **DS**（能力强，token 有限）和 **Gemini**（token 几乎无限）。
 创建任务文件后，用 `/assign-ai` 决定派给谁：
 
 ```
@@ -471,16 +471,16 @@ git push origin main   # 框架仓库直接 push，无需用户确认
 | 任务类型 | 推荐 AI |
 |---------|---------|
 | 简单调研、联网查资料 | Gemini 优先 |
-| 复杂多步推理、debug、大型实现 | GPT |
-| Gemini 搞不定的 | GPT 重做 |
+| 复杂多步推理、debug、大型实现 | DS |
+| Gemini 搞不定的 | DS 重做 |
 
 **`分配给` 字段标注规范**（任务文件头部）：
 
 | 标注 | 含义 |
 |------|------|
-| `本地 GPT` | 主项目本地 GPT 会话 |
-| `本地 GPT · <仓库名>` | 指定仓库的本地 GPT 会话 |
-| `远端 51 GPT · <仓库名>` | 指定远端机器的 GPT 会话 |
+| `本地 DS` | 主项目本地 DS 会话 |
+| `本地 DS · <仓库名>` | 指定仓库的本地 DS 会话 |
+| `远端 51 DS · <仓库名>` | 指定远端机器的 DS 会话 |
 | `Gemini` | 本地 Gemini（联网） |
 
 ### /dispatch — 输出下发指令
@@ -492,11 +492,11 @@ git push origin main   # 框架仓库直接 push，无需用户确认
 输出固定格式的下发指令，用户复制后发给对应 AI 会话：
 
 ```
-## 下一步（→ 本地 GPT）
+## 下一步（→ 本地 DS）
 
-请将以下指令发送给 ChatGPT：
+请将以下指令发送给 DeepSeek：
 
-> 请先读取 CHATGPT.md，然后执行 code-agent/tasks/<文件名>.md
+> 请先读取 DS.md，然后执行 code-agent/tasks/<文件名>.md
 ```
 
 ---
@@ -513,9 +513,9 @@ git push origin main   # 框架仓库直接 push，无需用户确认
 ```
 
 Claude 会：
-1. 检查项目是否有 `CHATGPT.md` 和 `code-agent/`，缺失时给出补全命令（不阻止注册）
-2. 在 global memory（`MEMORY.md` + `gpt-registry.md`）中添加项目拓扑、GPT 实例、仓库条目
-3. 若有远端，同时注册 `远端 GPT · <project-name>` 实例和 dispatch 路由
+1. 检查项目是否有 `DS.md` 和 `code-agent/`，缺失时给出补全命令（不阻止注册）
+2. 在 global memory（`MEMORY.md` + `ds-registry.md`）中添加项目拓扑、DS 实例、仓库条目
+3. 若有远端，同时注册 `远端 DS · <project-name>` 实例和 dispatch 路由
 
 ### /project-remove — 注销项目
 
@@ -525,10 +525,10 @@ Claude 会：
 
 Claude 会：
 1. 列出将从 memory 移除的条目，请用户确认
-2. 从 `MEMORY.md` 删除拓扑块、GPT 实例行、仓库行
-3. 将 `gpt-registry.md` 中的对应实例移至"历史停用实例"
+2. 从 `MEMORY.md` 删除拓扑块、DS 实例行、仓库行
+3. 将 `ds-registry.md` 中的对应实例移至"历史停用实例"
 
-**不会修改任何项目文件**——`CHATGPT.md`、`code-agent/`、知识库、任务文件全部保留。
+**不会修改任何项目文件**——`DS.md`、`code-agent/`、知识库、任务文件全部保留。
 随时可以重新 `/project-add` 恢复管理。
 
 ---
@@ -544,7 +544,7 @@ Claude 会：
    - /assign-ai 001a → 派给 Gemini（调研联网）
 3. 用户 → Gemini：请先读取 GEMINI.md，然后执行 code-agent/tasks/001a-xxx.md
 4. Gemini 完成 001a，填写结果
-5. Claude Review，/assign-ai 001b → 派给 GPT（实现）
+5. Claude Review，/assign-ai 001b → 派给 DS（实现）
 6. ...循环直到功能完成
 ```
 
@@ -553,17 +553,17 @@ Claude 会：
 ```
 1. 用户：运行时 crash 在 XX 函数，提供了 stack trace
 2. Claude：
-   - 创建调研任务，/assign-ai → GPT（需要多步推理定位根因）
+   - 创建调研任务，/assign-ai → DS（需要多步推理定位根因）
    - 允许插桩
-3. GPT 定位根因，填写结论
+3. DS 定位根因，填写结论
 4. Claude：基于根因创建修复任务，/dispatch 输出下发指令
-5. GPT 实现修复，Claude Review 修复代码
+5. DS 实现修复，Claude Review 修复代码
 ```
 
 ### 场景三：核心库 API 变更，适配器需要跟进
 
 ```
-1. 核心库 GPT 完成 API 变更任务，在 changelog 中标注 [PUBLIC]
+1. 核心库 DS 完成 API 变更任务，在 changelog 中标注 [PUBLIC]
 2. Claude 检查 changelog，识别 [PUBLIC] 条目
 3. Claude 更新各适配器的知识库对应章节
 4. Claude 为每个适配器创建跟进任务（说明 API 变更细节）

@@ -1,16 +1,16 @@
 # AI 协作框架模板
 
-Claude（设计/协调）+ ChatGPT Codex（编码）+ Gemini（大规模代码分析）的极简可移植模板。
+Claude（设计/协调）+ DeepSeek（编码）+ Gemini（大规模代码分析）的极简可移植模板。
 
 通用 skill（architect/assign-ai/dispatch/task/optimize）已全局安装在
 `~/.claude/skills/`，无需单独配置。
 
 ## 3 步部署新项目
 
-### 步骤 1：配置 CHATGPT.md（GPT 用）
+### 步骤 1：配置 DS.md（DS 用）
 
 ```bash
-cp ~/.claude/collab-framework/CHATGPT-template.md <新项目根目录>/CHATGPT.md
+cp ~/.claude/collab-framework/DS-template.md <新项目根目录>/DS.md
 ```
 
 打开文件，在顶部"项目定制"区块替换占位符：
@@ -18,7 +18,7 @@ cp ~/.claude/collab-framework/CHATGPT-template.md <新项目根目录>/CHATGPT.m
 - `[COMPANY]` → 公司名（如 `Sunmmio Inc.`）
 - `[PROJECT_SCOPE]` → 版权范围描述（如 `MyProject, Company's Device`）
 - `[YEAR]` → 当前年份（如 `2026`）
-- `[TYPECHECK_STATUS]` → **默认填"不启用"**；首个调研任务完成后，由 GPT 报告项目是否配置了 lint/typecheck 工具，再按实际情况更新
+- `[TYPECHECK_STATUS]` → **默认填"不启用"**；首个调研任务完成后，由 DS 报告项目是否配置了 lint/typecheck 工具，再按实际情况更新
 
 ### 步骤 2：配置 GEMINI.md（Gemini 用）
 
@@ -26,7 +26,7 @@ cp ~/.claude/collab-framework/CHATGPT-template.md <新项目根目录>/CHATGPT.m
 cp ~/.claude/collab-framework/GEMINI-template.md <新项目根目录>/GEMINI.md
 ```
 
-同样替换顶部占位符（与 CHATGPT.md 相同的四个变量）。
+同样替换顶部占位符（与 DS.md 相同的四个变量）。
 
 ### 步骤 3：复制 code-agent/ 骨架
 
@@ -36,8 +36,8 @@ cp -r ~/.claude/collab-framework/code-agent/ <新项目根目录>/code-agent/
 
 完成！Claude 的全局 skill 立即可用：
 - `/architect` — 系统设计、任务创建、代码 Review
-- `/dispatch <task-id>` — 下发任务给 GPT
-- `/assign-ai <task-id>` — 选型路由（Gemini vs GPT 5.3）
+- `/dispatch <task-id>` — 下发任务给 DS
+- `/assign-ai <task-id>` — 选型路由（Gemini vs DeepSeek）
 - `/task` — 查看当前任务状态
 - `/optimize` — 归档已完成任务
 
@@ -45,8 +45,8 @@ cp -r ~/.claude/collab-framework/code-agent/ <新项目根目录>/code-agent/
 
 | AI | 擅长 | token 限制 | 下发方式 |
 |----|------|-----------|---------|
-| **Gemini** | 大规模代码读取/分析、公开项目调研、知识库整理 | 无限 | 粘贴任务到 Gemini 对话（不用 CHATGPT.md） |
-| **GPT 5.3** | 实现/修复/调试/多文件改动 | 有限，省着用 | `/dispatch <task-id>` |
+| **Gemini** | 大规模代码读取/分析、公开项目调研、知识库整理 | 无限 | 粘贴任务到 Gemini 对话（不用 DS.md） |
+| **DeepSeek** | 实现/修复/调试/多文件改动 | 有限，省着用 | `/dispatch <task-id>` |
 | **Claude** | 设计/协调/架构/任务拆解/Review | — | 直接对话 |
 
 ### Gemini 任务规范

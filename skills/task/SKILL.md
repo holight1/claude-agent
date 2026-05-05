@@ -19,14 +19,14 @@ ls code-agent/tasks/*.md 2>/dev/null || echo "（无任务文件）"
 对每个任务文件，读取前 10 行，提取：
 - 文件名（编号）
 - 状态（待执行 / 执行中 / 已完成 / 失败）
-- 执行环境（本地 GPT / 远端 XX GPT）
+- 执行环境（本地 DS / 远端 XX DS）
 - 任务类型和简述
 
 输出格式：
 ```
 编号      状态        环境              简述
-035a      待执行      本地 GPT          research: XXX 模块初始化流程
-036a      已完成      远端 21 GPT       implement: YYY 接口
+035a      待执行      本地 DS          research: XXX 模块初始化流程
+036a      已完成      远端 21 DS       implement: YYY 接口
 ```
 
 ### 有 task-id：显示任务详情

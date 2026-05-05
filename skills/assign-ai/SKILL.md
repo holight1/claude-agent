@@ -1,16 +1,16 @@
 ---
-description: "Route tasks to the right AI - Gemini (unlimited, simple first) or GPT 5.3 (stronger, complex tasks)"
+description: "Route tasks to the right AI - Gemini (unlimited, simple first) or DeepSeek (stronger, complex tasks)"
 allowed-tools: ["Read", "Glob"]
 argument-hint: "<task-id or task description>"
 ---
 
 # /assign-ai - 路由到合适的 AI
 
-根据任务类型决定发给 **Gemini** 还是 **GPT 5.3**。
+根据任务类型决定发给 **Gemini** 还是 **DeepSeek**。
 
 ## 路由规则
 
-| → GPT 5.3（更强，省着用） | → Gemini（无限量） |
+| → DeepSeek（更强，省着用） | → Gemini（无限量） |
 |--------------------------|------------------|
 | 实现/修复/重构（impl/fix/refactor） | 调研/搜索/recon |
 | 多文件改动 | 构建/运行/测试执行 |
@@ -18,7 +18,7 @@ argument-hint: "<task-id or task description>"
 | 算法实现 & 结果验证 | 知识库整理/changelog |
 | 复杂配置脚本修改 | smoke test / 回归测试 |
 
-**默认原则**：调研 → Gemini；实现/调试 → GPT 5.3；有疑问时任务简单选 Gemini，任务复杂选 GPT 5.3。
+**默认原则**：调研 → Gemini；实现/调试 → DeepSeek；有疑问时任务简单选 Gemini，任务复杂选 DeepSeek。
 
 ## 执行步骤
 
@@ -31,13 +31,13 @@ argument-hint: "<task-id or task description>"
 
 根据任务描述中的关键词判断：
 
-- **偏 GPT 5.3**：implement、fix、refactor、debug、rewrite、multi-file、algorithm
+- **偏 DeepSeek**：implement、fix、refactor、debug、rewrite、multi-file、algorithm
 - **偏 Gemini**：research、investigate、survey、read、analyze、summarize、list、test-run
 
 ### 3. 输出建议
 
 ```
-**AI 建议：[Gemini / GPT 5.3]**
+**AI 建议：[Gemini / DeepSeek]**
 理由：<一句话说明原因>
 
 下一步：使用 `/dispatch <task-id>` 下发（dispatch skill 会按此路由执行）

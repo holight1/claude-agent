@@ -1,6 +1,6 @@
 # claude-agent
 
-Claude（设计/协调）+ GPT / Gemini（编码与调研）协作框架的全局配置与可移植模板。
+Claude（设计/协调）+ DS / Gemini（编码与调研）协作框架的全局配置与可移植模板。
 
 ## 目录结构
 
@@ -9,7 +9,7 @@ claude-agent/
 ├── install.sh                      # 一键安装/升级脚本
 ├── skills/                         # Claude Code 全局 skill
 │   ├── architect/SKILL.md          # 架构师角色：系统设计、任务创建、代码 Review
-│   ├── assign-ai/SKILL.md          # /assign-ai <task>：路由到 GPT 或 Gemini
+│   ├── assign-ai/SKILL.md          # /assign-ai <task>：路由到 DS 或 Gemini
 │   ├── dispatch/SKILL.md           # /dispatch <task-id>：下发任务给指定 AI
 │   ├── task/SKILL.md               # /task：查看当前任务状态
 │   ├── optimize/SKILL.md           # /optimize：归档已完成任务
@@ -17,15 +17,15 @@ claude-agent/
 │   └── project-remove/SKILL.md     # /project-remove <name>：注销项目（不删文件）
 ├── memory-template/                # 首次安装时的 global memory 模板
 │   ├── MEMORY.md
-│   └── gpt-registry.md
+│   └── ds-registry.md
 ├── agents/
 │   └── research-task-creator.md   # 自动生成调研任务文件的 agent
 └── collab-framework/               # 新项目部署模板
     ├── README.md                   # 部署说明
-    ├── CHATGPT-template.md         # GPT 配置模板（含占位符）
+    ├── DS-template.md         # DS 配置模板（含占位符）
     ├── GEMINI-template.md          # Gemini 配置模板
     ├── CLAUDE-template.md          # 项目说明模板
-    └── code-agent/                 # GPT 工作区骨架
+    └── code-agent/                 # DS 工作区骨架
         ├── ai-collaboration-framework.md
         ├── tasks/                  # 任务文件目录
         ├── designs/                # 设计文档目录
@@ -54,7 +54,7 @@ bash ~/claude-agent/install.sh
 
 详见 `collab-framework/README.md`，核心是 3 步：
 
-1. 复制 `CHATGPT-template.md` → 项目根目录 `CHATGPT.md`，替换占位符
+1. 复制 `DS-template.md` → 项目根目录 `DS.md`，替换占位符
 2. 复制 `GEMINI-template.md` → 项目根目录 `GEMINI.md`（可选）
 3. 复制 `code-agent/` 骨架到项目根目录
 

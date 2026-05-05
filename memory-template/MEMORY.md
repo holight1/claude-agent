@@ -4,7 +4,7 @@
 > 使用 `/project-add <路径>` 添加项目，`/project-remove <名称>` 移除项目。
 
 ## 工作规则
-- **不做复杂分析/调研**：创建调研任务让 GPT / Gemini 做，不要自己分析
+- **不做复杂分析/调研**：创建调研任务让 DS / Gemini 做，不要自己分析
 - **想自己动手前先问用户**：编码/调研/调试必须先征求用户同意
 - **任务放对应仓库**：每个项目的任务放各自的 `code-agent/tasks/`
 - **知识库引用标章节号**：任务文件引用知识库只写章节号（如 §4.5），行号会变
@@ -19,7 +19,7 @@
 （使用 /project-add 添加项目后自动填充）
 ```
 
-## GPT 实例（详细见 `gpt-registry.md`）
+## DS 实例（详细见 `ds-registry.md`）
 
 | 标注 | 仓库/用途 | 状态 |
 |------|----------|------|
@@ -38,8 +38,8 @@
 
 ## 协作框架
 - **通用 skill 已全局化**：architect/assign-ai/dispatch/task/optimize/project-add/project-remove 在 `~/.claude/skills/`
-- **新项目模板**：`~/.claude/collab-framework/`（2步部署：CHATGPT.md/GEMINI.md + code-agent/）
-- **typecheck**：已有项目 Claude 自查；新项目第一个调研任务让 GPT 自查；无配置默认不启用
+- **新项目模板**：`~/.claude/collab-framework/`（2步部署：DS.md/GEMINI.md + code-agent/）
+- **typecheck**：已有项目 Claude 自查；新项目第一个调研任务让 DS 自查；无配置默认不启用
 - 分主题知识见各仓库 `code-agent/knowledge/`（README.md 有索引）
 
 ## 踩坑速记
