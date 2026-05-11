@@ -1,67 +1,42 @@
 # claude-agent
 
-Claude（设计/协调）+ DS / Gemini（编码与调研）协作框架的全局配置与可移植模板。
+CC + Codex + DS 协作框架，用于在新机器上快速部署相同的协作环境。
 
-## 目录结构
+## 包含内容
 
-```
-claude-agent/
-├── install.sh                      # 一键安装/升级脚本
-├── skills/                         # Claude Code 全局 skill
-│   ├── architect/SKILL.md          # 架构师角色：系统设计、任务创建、代码 Review
-│   ├── assign-ai/SKILL.md          # /assign-ai <task>：路由到 DS 或 Gemini
-│   ├── dispatch/SKILL.md           # /dispatch <task-id>：下发任务给指定 AI
-│   ├── task/SKILL.md               # /task：查看当前任务状态
-│   ├── optimize/SKILL.md           # /optimize：归档已完成任务
-│   ├── project-add/SKILL.md        # /project-add <path>：注册项目到全局管理
-│   └── project-remove/SKILL.md     # /project-remove <name>：注销项目（不删文件）
-├── memory-template/                # 首次安装时的 global memory 模板
-│   ├── MEMORY.md
-│   └── ds-registry.md
-├── agents/
-│   └── research-task-creator.md   # 自动生成调研任务文件的 agent
-└── collab-framework/               # 新项目部署模板
-    ├── README.md                   # 部署说明
-    ├── DS-template.md         # DS 配置模板（含占位符）
-    ├── GEMINI-template.md          # Gemini 配置模板
-    ├── CLAUDE-template.md          # 项目说明模板
-    └── code-agent/                 # DS 工作区骨架
-        ├── ai-collaboration-framework.md
-        ├── tasks/                  # 任务文件目录
-        ├── designs/                # 设计文档目录
-        └── knowledge/
-            ├── README.md
-            └── 01-project-structure.md
-```
+| 文件 | 用途 |
+|------|------|
+| `WORKFLOW.md` | 协作行为规则（review流程、dispatch格式、任务文件规范） |
+| `memory-template/MEMORY.md` | 全局记忆模板 |
+| `memory-template/gpt-registry-template.md` | DS 实例注册表模板（填入实际 SSH 地址） |
+| `collab-framework/DS-template.md` | 新项目 DS.md 模板 |
+| `install.sh` | 一键安装脚本 |
 
-## 安装
+## 快速部署
 
 ```bash
-git clone <repo-url> ~/claude-agent
+# 1. 安装工具
+# - Claude Code: https://claude.ai/code
+# - RTK: https://github.com/anthropics/rtk
+
+# 2. 克隆并安装
+git clone <this-repo> ~/claude-agent
 bash ~/claude-agent/install.sh
+
+# 3. 补充机器相关配置
+# - 把 ~/CLAUDE.md（全局协调者规则）复制过来
+# - 编辑 ~/.claude/projects/.../memory/gpt-registry.md，填入实际 SSH 地址
+# - Clone 项目仓库（DS.md 和 code-agent/ 随仓库一起带来）
 ```
-
-脚本完成：skills 安装、agents 安装、collab-framework 安装、global memory 初始化（已有则跳过）。
-
-安装后可用命令：
-`/architect`、`/assign-ai`、`/dispatch`、`/task`、`/optimize`、`/project-add`、`/project-remove`
-
-## 详细使用说明
-
-见 [USAGE.md](USAGE.md)，涵盖：调研任务/开发任务下发、任务文件格式、知识库管理、多项目关系处理、AI 选型和典型场景示例。
-
-## 为新项目部署协作框架
-
-详见 `collab-framework/README.md`，核心是 3 步：
-
-1. 复制 `DS-template.md` → 项目根目录 `DS.md`，替换占位符
-2. 复制 `GEMINI-template.md` → 项目根目录 `GEMINI.md`（可选）
-3. 复制 `code-agent/` 骨架到项目根目录
 
 ## 升级
 
 ```bash
-cd ~/claude-agent
-git pull
-bash install.sh   # 幂等，已有 memory 不覆盖
+cd ~/claude-agent && git pull && bash install.sh
 ```
+
+## 说明
+
+- **Skills 已废弃**：行为规则迁移至 `WORKFLOW.md`，由 CC 从 memory 驱动
+- **RTK hook** 由 `rtk init --global` 自管理，不在此仓库维护
+- **Memory** 不随此仓库迁移——项目上下文随工作自然重建，gpt-registry.md 按新机器网络填写
