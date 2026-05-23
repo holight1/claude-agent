@@ -17,27 +17,24 @@ cp ~/claude-agent/collab-framework/DS-common.md ~/.claude/collab-framework/DS-co
 
 ### 1.2 初始化 Memory
 
-> **说明**：以下路径是 **Claude Code 专用** 的 memory 存储位置，由工作目录（`~/`）自动派生。
-> 其他架构师 Agent（Codex 等）有自己的 memory 机制，可跳过此步或自行适配。
+架构师需要维护两份持久化记录，**存在哪里由你自己的 memory 机制决定**：
 
-检查 memory 目录是否存在：
+| 记录 | 内容 | 模板 |
+|------|------|------|
+| **memory 索引**（MEMORY.md） | 工作规则、项目拓扑、跨项目踩坑 | `memory-template/MEMORY.md` |
+| **DS 路由注册表**（gpt-registry.md） | DS 实例 ↔ SSH 路由映射 | `memory-template/gpt-registry-template.md` |
 
-```bash
-ls ~/.claude/projects/-home-$(whoami)/memory/ 2>/dev/null
-```
-
-若不存在，从模板创建：
+如果你是 Claude Code（从 `~/` 启动），memory 目录在：
 
 ```bash
-mkdir -p ~/.claude/projects/-home-$(whoami)/memory
-cp ~/claude-agent/memory-template/MEMORY.md ~/.claude/projects/-home-$(whoami)/memory/MEMORY.md
-cp ~/claude-agent/memory-template/gpt-registry-template.md \
-   ~/.claude/projects/-home-$(whoami)/memory/gpt-registry.md
+~/.claude/projects/-home-$(whoami)/memory/
 ```
 
-然后提示用户：编辑 `gpt-registry.md`，填入实际机器 SSH 地址和仓库路径。
+若该目录不存在，从模板创建并告知用户编辑 `gpt-registry.md` 填入实际 SSH 地址和仓库路径。
 
-### 1.4 完成后汇报
+其他架构师 Agent 按自己的 memory 机制初始化这两份内容即可，模板内容仅供参考。
+
+### 1.3 完成后汇报
 
 列出已执行的步骤（跳过的说明"已存在"），告知用户下一步是添加项目仓库。
 
@@ -262,8 +259,8 @@ AI：DeepSeek（理由一句话）
 | 用途 | 路径 |
 |------|------|
 | 通用 DS 规则 | `~/.claude/collab-framework/DS-common.md` |
-| DS 路由注册表 | `~/.claude/projects/-home-$(whoami)/memory/gpt-registry.md`（Claude Code 专用路径） |
-| 全局 memory 索引 | `~/.claude/projects/-home-$(whoami)/memory/MEMORY.md`（Claude Code 专用路径） |
+| DS 路由注册表 | `gpt-registry.md`（存储位置由架构师 memory 机制决定） |
+| 全局 memory 索引 | `MEMORY.md`（存储位置由架构师 memory 机制决定） |
 | 全局 CLAUDE.md | `~/.claude/CLAUDE.md` |
 | 新项目 DS.md 模板 | `~/claude-agent/collab-framework/DS-template.md` |
 | 新项目 code-agent 模板 | `~/claude-agent/collab-framework/code-agent/` |
