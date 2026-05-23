@@ -1,15 +1,15 @@
 # claude-agent
 
-多 AI 协作框架：Claude 担任架构师，DS / Gemini 执行编码和调研任务。
+多 AI 协作框架：架构师 Agent 负责设计和协调，DS 执行编码和调研任务。
 
-Claude 设计接口、拆任务、Review 代码；DS / Gemini 聚焦单一任务执行。任务文件是双方之间的"合同"——描述架构约束和验收条件，不写实现步骤，由 DS 读现有代码自行推导实现。
+架构师可以是 Claude / Codex / DS，任意具备长上下文和工具调用能力的 AI 均可担任。架构师设计接口、拆任务、Review 代码；DS 聚焦单一任务执行。任务文件是双方之间的"合同"——描述架构约束和验收条件，不写实现步骤，由 DS 读现有代码自行推导实现。
 
 ---
 
 ## 前置条件
 
-- [Claude Code](https://claude.ai/code)（架构师端）
-- DeepSeek / Gemini 访问权限（执行端，本地会话或远端机器均可）
+- 架构师 Agent（Claude Code / Codex 等，有工具调用和持久 memory 的 AI）
+- DeepSeek 访问权限（执行端，本地会话或远端机器均可）
 
 ---
 
@@ -17,43 +17,56 @@ Claude 设计接口、拆任务、Review 代码；DS / Gemini 聚焦单一任务
 
 ```bash
 git clone <this-repo> ~/claude-agent
-cd ~ && claude
 ```
 
-然后把这句话发给 Claude（架构师 Agent）：
+然后把这句话发给架构师 Agent：
 
 > 请阅读 `~/claude-agent/USAGE.md`，按其中的 Setup 指南完成环境初始化，完成后告诉我做了哪些步骤。
 
-Claude 会自动完成：部署通用规则文件、初始化 memory、在 `~/.claude/CLAUDE.md` 中注册框架。
+架构师会自动完成：部署通用规则文件、初始化 memory、在全局配置中注册框架。
+
+---
+
+## 建议工作流：新仓库从调研开始
+
+> **建议**：接手一个新仓库时，第一个任务始终是调研，让 DS 读仓库结构、构建系统、关键模块边界，完成后架构师用调研结果补充 DS.md，再开始具体开发任务。
+
+```
+1. 初始 DS.md（仅角色 + 构建命令）
+2. 下发调研任务 → DS 读源码，总结仓库布局、关键接口、已知约束
+3. 架构师用调研结论补充 DS.md（仓库布局、任务编号规范、知识库初始章节）
+4. 后续开发任务 DS 可直接读 DS.md 快速上下文
+```
+
+设计阶段也建议（非强制）先落盘设计文档到 `code-agent/designs/<name>.md`，再从设计创建任务文件。好处是多个 DS 会话可以共享同一份设计背景。
 
 ---
 
 ## 使用示例
 
-### 场景一：调研一个模块
+### 场景一：新仓库调研
 
 ```
-我：serverd 守护进程是怎么初始化设备的？让 DS 调研一下。
+我：llvm-unicore 新接手，先让 DS 摸底。
 
-Claude：好，我来创建调研任务。
-[创建 code-agent/tasks/041a-research-serverd-init.md]
+架构师：好，创建调研任务。
+[创建 code-agent/tasks/001a-research-repo-structure.md]
 
 ---
-下一步（→ 本地 DS · myproject）
-AI：Gemini（调研类，无限量）
+下一步（→ 本地 DS · llvm-unicore）
+AI：DeepSeek
 
-请将以下指令发给 Gemini：
-> 请先读取 DS.md，然后执行 code-agent/tasks/041a-research-serverd-init.md
+> 请先读取 DS.md，然后执行 code-agent/tasks/001a-research-repo-structure.md
 ```
 
-Gemini 完成后：
+DS 返回后：
 
 ```
-我：041a 返回了
+我：001a 返回了
 
-Claude：[读完成区，提取技术结论，更新知识库]
-        发现设备初始化分三步：枚举 → 上电 → 注册中断。
-        已更新 code-agent/knowledge/03-serverd.md §3.1。
+架构师：[读完成区] DS 总结了：Target 目录结构、CMake 配置方式、已有测试套件位置。
+        [用结论补充 DS.md §仓库布局、§构建环境、§知识库初始化]
+        DS.md 已更新，可以开始开发任务。
 ```
 
 ---
@@ -63,15 +76,16 @@ Claude：[读完成区，提取技术结论，更新知识库]
 ```
 我：LLVM 后端需要支持 float 调用约定，DS 来实现。
 
-Claude：好，设计决策如下：
+架构师：好，设计决策如下：
         - f32/f64 参数通过 RF1-RF15 寄存器传递（Full LocInfo）
         - 不走 BCvt 路径，避免无效 stt/ldt roundtrip
+        [（可选）落盘 code-agent/designs/float-cc.md]
         [创建 code-agent/tasks/027c-implement-float-cc.md]
         任务包含：架构决策 + 测试场景（新增 float-calling-conv.ll 的行为特征）
 
 ---
 下一步（→ 本地 DS · llvm-unicore）
-AI：DeepSeek（实现类）
+AI：DeepSeek
 > 请先读取 DS.md，然后执行 code-agent/tasks/027c-implement-float-cc.md
 ```
 
@@ -80,7 +94,7 @@ DS 实现后：
 ```
 我：027c 返回了
 
-Claude：[读完成区] DS 实现了 LowerCCCArguments f32/f64 case，
+架构师：[读完成区] DS 实现了 LowerCCCArguments f32/f64 case，
         新增 float-calling-conv.ll，CHECK-NOT stt 确认无无效 roundtrip。
         发现一处测试断言口径不一致，直接修复。
         lit 4/4 PASS → commit 027c。
@@ -93,15 +107,15 @@ Claude：[读完成区] DS 实现了 LowerCCCArguments f32/f64 case，
 ```
 我：027d 和 196a 都可以并行，DS 各发一个。
 
-Claude：[创建两个任务文件]
+架构师：[创建两个任务文件]
 
 ---
-下一步（→ 本地 DS · llvm-unicore）
+下一步（→ 本地 DS · repo-A）
 AI：DeepSeek
 > 请先读取 DS.md，然后执行 code-agent/tasks/027d-remove-dead-bitcast.md
 
 ---
-下一步（→ 远端 21 DS · SuBase-SY）
+下一步（→ 远端 21 DS · repo-B）
 AI：DeepSeek
 > 请先读取 DS.md，然后执行 code-agent/tasks/196a-hotpath-analysis.md
 ```
@@ -113,9 +127,9 @@ AI：DeepSeek
 ### 场景四：Review 返回结果
 
 ```
-我：027d 返回了（/ /rt 027d）
+我：027d 返回了（/rt 027d）
 
-Claude：[读任务文件 ## Codex Review 最新 Round]
+架构师：[读任务文件 ## Codex Review 最新 Round]
         高：getTargetNodeName 漏了 BITCAST_FP_TO_RD case — 直接修复
         中：—
         [修复 + 运行 lit + 通过 → commit]
