@@ -23,7 +23,7 @@ git clone <this-repo> ~/claude-agent
 
 > 请阅读 `~/claude-agent/USAGE.md`，按其中的 Setup 指南完成环境初始化，完成后告诉我做了哪些步骤。
 
-架构师会自动完成：部署通用规则文件、初始化 memory、在全局配置中注册框架。
+架构师会自动完成：部署通用规则文件（`DS-common.md`）、初始化 memory 记录。
 
 ---
 

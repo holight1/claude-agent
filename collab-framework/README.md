@@ -1,65 +1,43 @@
-# AI 协作框架模板
+# collab-framework — 模板目录
 
-Claude（设计/协调）+ DeepSeek（编码）+ Gemini（大规模代码分析）的极简可移植模板。
+存放可复用的初始化模板，用于新建项目的协作骨架。
 
-通用 skill（architect/assign-ai/dispatch/task/optimize）已全局安装在
-`~/.claude/skills/`，无需单独配置。
+---
 
-## 3 步部署新项目
+## 文件说明
 
-### 步骤 1：配置 DS.md（DS 用）
+| 文件/目录 | 用途 |
+|-----------|------|
+| `DS-common.md` | 通用 DS 规则（部署到 `~/.claude/collab-framework/`） |
+| `DS-template.md` | 新项目 `DS.md` 模板 |
+| `CLAUDE-template.md` | 新项目 `CLAUDE.md` 模板（可选） |
+| `dispatch.md` | 下发任务流程描述 |
+| `review-task.md` | 任务返回处理流程描述 |
+| `code-agent/` | 新项目 `code-agent/` 目录骨架 |
 
-```bash
-cp ~/.claude/collab-framework/DS-template.md <新项目根目录>/DS.md
-```
+---
 
-打开文件，在顶部"项目定制"区块替换占位符：
-- `[AUTHOR]` → 作者姓名（如 `SUI Yan`）
-- `[COMPANY]` → 公司名（如 `Sunmmio Inc.`）
-- `[PROJECT_SCOPE]` → 版权范围描述（如 `MyProject, Company's Device`）
-- `[YEAR]` → 当前年份（如 `2026`）
-- `[TYPECHECK_STATUS]` → **默认填"不启用"**；首个调研任务完成后，由 DS 报告项目是否配置了 lint/typecheck 工具，再按实际情况更新
+## 初始化新项目
 
-### 步骤 2：配置 GEMINI.md（Gemini 用）
+详细流程见 `../USAGE.md §2`，核心是两步：
 
-```bash
-cp ~/.claude/collab-framework/GEMINI-template.md <新项目根目录>/GEMINI.md
-```
-
-同样替换顶部占位符（与 DS.md 相同的四个变量）。
-
-### 步骤 3：复制 code-agent/ 骨架
+### 1. 创建 DS.md
 
 ```bash
-cp -r ~/.claude/collab-framework/code-agent/ <新项目根目录>/code-agent/
+cp ~/.claude/collab-framework/DS-template.md /path/to/project/DS.md
 ```
 
-完成！Claude 的全局 skill 立即可用：
-- `/architect` — 系统设计、任务创建、代码 Review
-- `/dispatch <task-id>` — 下发任务给 DS
-- `/assign-ai <task-id>` — 选型路由（Gemini vs DeepSeek）
-- `/task` — 查看当前任务状态
-- `/optimize` — 归档已完成任务
+打开文件，替换占位符：
 
-## AI 分工速查
+- `[PROJECT_NAME]` → 项目名（如 `llvm-unicore`）
+- `[PREFIX]` → 任务文件前缀（如 `DL`，生成 `DL-001a-描述.md`）
 
-| AI | 擅长 | token 限制 | 下发方式 |
-|----|------|-----------|---------|
-| **Gemini** | 大规模代码读取/分析、公开项目调研、知识库整理 | 无限 | 粘贴任务到 Gemini 对话（不用 DS.md） |
-| **DeepSeek** | 实现/修复/调试/多文件改动 | 有限，省着用 | `/dispatch <task-id>` |
-| **Claude** | 设计/协调/架构/任务拆解/Review | — | 直接对话 |
+其余章节（仓库布局、知识库、工作规则）**先留空**，第一次调研任务完成后由架构师补充。
 
-### Gemini 任务规范
-
-- `**执行环境**：Gemini`（不填具体仓库）
-- 任务文件末尾写"下发方式"说明（上传哪些文件、如何提交）
-- 输出约定：Gemini 返回 Markdown 格式知识，由 Claude 写入知识库
-- 任务文件仍放在对应仓库的 `code-agent/tasks/` 下（便于追踪）
-
-## 可选：CLAUDE.md
-
-若项目有构建/测试命令，复制并填写 CLAUDE-template.md：
+### 2. 复制 code-agent/ 骨架
 
 ```bash
-cp ~/.claude/collab-framework/CLAUDE-template.md <新项目根目录>/CLAUDE.md
+cp -r ~/.claude/collab-framework/code-agent/ /path/to/project/code-agent/
 ```
+
+骨架包含：`tasks/`、`designs/`、`knowledge/README.md`、`knowledge/01-project-structure.md`、`knowledge/10-changelog.md`。
