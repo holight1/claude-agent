@@ -201,28 +201,27 @@ DS.md 只写项目特有内容，通用规则通过引用 DS-common.md 获取。
 
 ### 5.1 下发任务
 
-1. 创建任务文件
-2. 用 `/dispatch <task-id>` 生成标准下发指令
-3. 将指令复制给对应 DS 会话
+详细流程见 `collab-framework/dispatch.md`。核心步骤：
 
-下发指令格式：
+1. 确认任务文件存在（`code-agent/tasks/NNNx-描述.md`）
+2. 读取 `**执行环境**` 字段，若为远端则先 scp 同步任务文件（路由从 `gpt-registry.md` 取）
+3. 输出标准下发指令：
 
 ```
-## 下一步（→ 本地 DS · <仓库名>）
+## 下一步（→ 本地/远端 <nickname> DS · <仓库名>）
 AI：DeepSeek（理由一句话）
-
 > 请先读取 DS.md，然后执行 code-agent/tasks/<文件名>.md
 ```
 
 ### 5.2 任务返回处理
 
-用 `/rt <task-id>`（即 `/review-task`）：
+详细流程见 `collab-framework/review-task.md`。核心步骤：
 
-1. 读任务文件完成区
-2. 检查代码变更（`git status` + 读相关文件）
-3. 轻量问题直接修复，阻断问题报告用户
-4. 按需更新 memory 和知识库
-5. Review 通过 → 自动 commit（不自动 push）
+1. 远端任务先 scp 拉回最新任务文件
+2. 读完成区，确认状态和遗留问题
+3. Review 代码（有改动时）：轻量问题直接修复，阻断问题报告用户
+4. 更新 memory 和知识库
+5. Review 通过 → commit（不自动 push）
 
 ### 5.3 DS 实例选择
 
