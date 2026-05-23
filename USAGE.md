@@ -1,588 +1,269 @@
-# 使用指南
+# USAGE.md — 架构师 Agent 工作指南
 
-本文档说明如何使用 Claude + DeepSeek 协作框架完成实际开发工作。
-
----
-
-## 目录
-
-1. [核心思路](#1-核心思路)
-2. [快速开始](#2-快速开始)
-3. [下发调研任务](#3-下发调研任务)
-4. [下发开发任务](#4-下发开发任务)
-5. [任务文件格式参考](#5-任务文件格式参考)
-6. [知识库管理](#6-知识库管理)
-7. [多项目逻辑关系](#7-多项目逻辑关系)
-8. [会话管理](#8-会话管理)
-9. [AI 选型与下发](#9-ai-选型与下发)
-10. [项目管理](#10-项目管理)
-11. [常见场景示例](#11-常见场景示例)
+本文档面向架构师 Agent（Claude Code，从 `~/` 启动）。包含：首次 Setup、新项目初始化、核心原则、任务文件规范、日常工作流。
 
 ---
 
-## 1. 核心思路
+## 1. 首次 Setup
 
-**分工**：Claude 负责设计和协调，DS / Gemini 负责编码和调研。
+用户在新机器上 clone 此仓库后，将以下步骤一次性完成：
 
-```
-用户需求
-  → Claude 分析、拆解、创建任务文件
-  → /assign-ai 决定派给 DS 还是 Gemini
-  → 用户将任务指令发给对应 AI
-  → AI 执行任务、填写结果
-  → Claude Review 结果，小问题直接修复
-  → Review 通过后自动本地 commit
-```
-
-**为什么这样分工？**
-
-- Claude 有完整的对话上下文，适合做设计决策和任务拆解
-- DS / Gemini 每次从零开始，适合聚焦单一任务的编码执行
-- 任务文件是两者之间的"合同"，清晰定义输入和输出
-
-**关键约束**：
-
-- AI 每次必须先读 `DS.md`（或 `GEMINI.md`），获取项目规范
-- 每个任务文件是独立的，AI 不依赖之前任务的记忆
-- Claude 不做复杂实现/调研；review 中的轻量修复可直接处理
-- Review 无阻断问题且验收通过后，Claude 自动本地 commit；不自动 push
-
----
-
-## 2. 快速开始
-
-### 安装
+### 1.1 部署通用 DS 规则
 
 ```bash
-git clone <repo-url> ~/claude-agent
-bash ~/claude-agent/install.sh
+mkdir -p ~/.claude/collab-framework
+cp ~/claude-agent/collab-framework/DS-common.md ~/.claude/collab-framework/DS-common.md
 ```
 
-脚本幂等，可重复执行；已有 memory 不覆盖。
+### 1.2 注册框架到全局 CLAUDE.md
 
-### 初始化新项目
-
-详见 `collab-framework/README.md`，核心是 3 步：
+检查 `~/.claude/CLAUDE.md` 是否已有 `@WORKFLOW.md`（若已有则跳过）：
 
 ```bash
-cd /path/to/your-project
-
-# 1. 配置 DS 工作规范
-cp ~/.claude/collab-framework/DS-template.md DS.md
-# 编辑 DS.md，替换顶部占位符（作者、公司、项目名、年份）
-
-# 2. 配置 Gemini 工作规范（可选，有 Gemini 实例时）
-cp ~/.claude/collab-framework/GEMINI-template.md GEMINI.md
-
-# 3. 创建协作工作区
-cp -r ~/.claude/collab-framework/code-agent/ code-agent/
+grep -q "@WORKFLOW.md" ~/.claude/CLAUDE.md 2>/dev/null || echo "@WORKFLOW.md" >> ~/.claude/CLAUDE.md
 ```
 
-### 开始工作
+（若 `~/.claude/CLAUDE.md` 不存在，先确认用户的全局 `~/CLAUDE.md` 已就位，再处理。）
 
-**推荐从 `~/` 启动 Claude Code**（全局协调者视角）：
+### 1.3 初始化 Memory
+
+检查 memory 目录是否存在：
 
 ```bash
-cd ~
-claude
+ls ~/.claude/projects/-home-$(whoami)/memory/ 2>/dev/null
 ```
 
-从 `~/` 启动时，memory 存储在 `~/.claude/projects/-home-<user>/memory/`，
-跨项目全局共享，Claude 可同时协调多个仓库的 DS 任务。
-Claude 读取各项目 CLAUDE.md 时仍然正常，无需切换到项目目录。
+若不存在，从模板创建：
 
-使用 `/architect` 激活架构师模式开始设计工作。
+```bash
+mkdir -p ~/.claude/projects/-home-$(whoami)/memory
+cp ~/claude-agent/memory-template/MEMORY.md ~/.claude/projects/-home-$(whoami)/memory/MEMORY.md
+cp ~/claude-agent/memory-template/gpt-registry-template.md \
+   ~/.claude/projects/-home-$(whoami)/memory/gpt-registry.md
+```
+
+然后提示用户：编辑 `gpt-registry.md`，填入实际机器 SSH 地址和仓库路径。
+
+### 1.4 完成后汇报
+
+列出已执行的步骤（跳过的说明"已存在"），告知用户下一步是添加项目仓库。
 
 ---
 
-## 3. 下发调研任务
+## 2. 新项目初始化
 
-调研任务用于让 DS **读代码、查资料、回答具体问题**，不要求写代码。
+每个项目仓库需要 `DS.md` + `code-agent/` 两件套。
 
-### 何时使用调研任务
+### 2.1 创建 DS.md
 
-- 不了解某个模块的实现方式，需要 DS 读源码并总结
-- 需要确认某个 API 的正确用法（参数、返回值、约束）
-- 遇到 bug，需要 DS 分析调用链和根因
-- 技术选型前，需要 DS 对比多种方案
+从模板复制到项目根目录：
 
-### 创建调研任务
+```bash
+cp ~/.claude/collab-framework/DS-template.md /path/to/project/DS.md
+```
 
-告诉 Claude 需要调研什么，Claude 会创建任务文件并给出下发指令。
-也可以用 `/architect` 让 Claude 进入架构师模式后直接下发。
-
-**调研任务的关键要素**：
-
-1. **具体问题**：禁止模糊目标（如"了解 XX 模块"），必须是可验证的具体问题
-2. **知识库引用**：列出相关章节和行号范围，节省 DS context
-3. **调研范围**：指定需要分析的文件列表
-4. **输出格式**：明确要求 DS 给出代码位置和行号
-
-**示例**：
-
-> **用户**：我想知道 serverd 守护进程是怎么初始化设备的，让 DS 调研一下。
->
-> **Claude**：（创建任务文件 `041-research-serverd-init.md`，内容包含：需要分析的文件路径、
-> 具体问题列表、知识库相关章节行号）
->
-> **下发指令**：`请先读取 DS.md，然后执行 code-agent/tasks/041-research-serverd-init.md`
-
-### 允许插桩的调研
-
-对于运行时行为分析（如调用顺序、数据流向），可在任务中允许 DS 插桩：
+DS.md 头部固定引用通用规则：
 
 ```markdown
-**调试选项**：允许插桩
-- 使用 printf("[DEBUG] ...") 格式
-- 调试完成后必须移除插桩代码
+**阅读顺序：先读 `~/.claude/collab-framework/DS-common.md`，再读本文件。**
 ```
+
+**初始 DS.md 只填基础字段（角色、项目背景、构建命令），其余字段等第一次调研任务完成后由架构师补充。**
+
+### 2.2 创建 code-agent/
+
+```bash
+cp -r ~/claude-agent/collab-framework/code-agent/ /path/to/project/code-agent/
+```
+
+目录结构：
+
+```
+code-agent/
+  tasks/          # 任务文件（DA-NNNx-描述.md）
+  knowledge/      # 知识库
+    README.md     # 知识库主题索引
+    10-changelog.md
+```
+
+### 2.3 注册到 Memory
+
+在 `gpt-registry.md` 中添加项目对应的 DS 路由规则（本地路径 + 远端 scp 命令）。
+
+在 `MEMORY.md` 中添加项目拓扑条目。
 
 ---
 
-## 4. 下发开发任务
+## 3. 核心原则
 
-开发任务要求 DS **修改或新建代码**，需要比调研任务更精确的规格说明。
+### 3.1 架构师职责
 
-### 何时使用开发任务
+- **做**：设计接口/约束、拆任务、Review 代码、小问题直接修复、提交
+- **不做**：复杂调研（创建调研任务让 DS 做）、具体实现（交给 DS）
+- Review 中轻量问题（测试断言、漏改引用、格式）：直接修复 + 运行验收
+- Review 中阻断问题（设计不符、ABI 破坏、多文件重构）：报告用户，视情况下发修复任务
 
-- 实现一个明确设计好的功能模块
-- 修复已定位根因的 bug
-- 重构某段代码（已有明确的目标结构）
-- 补充测试用例
+### 3.2 TDD 合同风格（任务文件核心）
 
-### 设计先行原则
+任务文件 = 接口说明书 + 架构决策 + 测试场景，**不写实现伪码**。
 
-**在创建开发任务前**，Claude 应完成设计决策：
+**写什么**：
+- 架构决策（DS 无法从代码推断的选择：ABI、接口、关键约束）
+- 测试场景：*必须保持通过的现有测试* + *新增测试的行为特征（不写 CHECK 模式）*
+- 参考指针（"参考 xxx.c 的 yyy 模式"）
+- 工具链路径、CMake 变量名等环境信息
 
-- 确定数据结构和接口签名
-- 确定文件变更清单
-- 确定关键算法或实现方案
+**不写什么**：
+- for 循环伪码、Step 1/2/3 手把手分解
+- 具体 CHECK 模式（DS 跑工具后自己写）
+- 行号引用（行号会变）
 
-设计文档存放在 `code-agent/designs/`，任务文件引用设计文档。
+### 3.3 两层 DS.md 结构
 
-### 开发任务的关键要素（TDD 合同风格）
+| 文件 | 内容 | 维护者 |
+|------|------|--------|
+| `~/.claude/collab-framework/DS-common.md` | 通用规则（不 commit、完成区格式、查询顺序） | 此仓库统一维护 |
+| 项目根目录 `DS.md` | 项目 context（角色、布局、构建、任务编号、项目特有规则） | 架构师随项目演进补充 |
 
-约束通过测试场景表达，DS 实现到测试通过为止：
+DS.md 只写项目特有内容，通用规则通过引用 DS-common.md 获取。
 
-1. **约定（架构决策）**：DS 无法从代码推断的设计选择（ABI、接口、关键约束）
-2. **测试场景**：分两类——
-   - *通过已有测试*：列出必须保持通过的现有测试套件
-   - *新增测试*：描述场景 + 期望特征（不写具体 CHECK，DS 跑工具后写）
-3. **排除区**：明确不需要动的文件/功能
-4. **验收命令**：可运行的验证命令
+### 3.4 Review 分类
 
-**不写**：实现步骤、switch/case 代码片段、具体 CHECK 模式——DS 读现有代码自行推导。
-
-### 任务粒度控制
-
-- 单个任务应在 2-4 小时内完成
-- 复杂功能拆分为多个子任务（用字母后缀：`035a`、`035b`）
-- 子任务之间明确依赖关系（"前置任务：035a 完成后执行"）
-
-**示例拆分**：
-
-```
-035a  调研：确认 API 参数语义      → 产出：知识库更新
-035b  实现：核心数据结构           → 产出：头文件
-035c  实现：初始化与销毁逻辑       → 产出：.c 文件
-035d  实现：主逻辑                 → 产出：.c 文件
-035e  验证：端到端测试             → 产出：测试通过截图
-```
-
-### 下发指令格式（固定）
-
-用 `/dispatch <task-id>` 自动生成，或手写：
-
-```
-## 下一步（→ [目标 AI 标识]）
-
-请将以下指令发送给 DeepSeek / Gemini：
-
-> 请先读取 DS.md（或 GEMINI.md），然后执行 code-agent/tasks/<文件名>.md
-```
-
-**目标 AI 标识示例**：
-- `→ 本地 DS`
-- `→ 远端 51 DS · <仓库名>`
-- `→ Gemini`
-
-多仓库并行时每条指令前都必须有标注，用户一眼看清发给哪个会话。
-不清楚该派给谁时，先用 `/assign-ai` 决策。
-
-**注意**：每次给同一个 AI 会话一个任务，等结果回来后再下发下一个。
-不同 AI 会话的任务可以并行。
+| 任务类型 | Review 重点 |
+|---------|-------------|
+| 通过已有测试 | 检查 pass/fail 结果即可 |
+| 新增测试 | 重点 review CHECK 语义是否正确（这是架构师的核心职责） |
 
 ---
 
-## 5. 任务文件格式参考
+## 4. 任务文件规范
+
+### 4.1 文件命名
+
+`code-agent/tasks/<编号>-<类型>-<简述>.md`
+
+编号格式：三位数字 + 字母后缀，如 `027c`、`035a`；子步骤用数字：`035a1`。
+
+类型：`research` / `implement` / `fix` / `continue`
+
+### 4.2 必须包含的字段
 
 ```markdown
-# 任务：<编号> — <标题>
+# 任务标题
 
-**状态**：pending
-**分配给**：[本地 DS / 本地 DS · <仓库名> / 远端 51 DS · <仓库名> / Gemini]
-**创建者**：Claude
-**执行环境**：[本地 / 远端 user@host · 项目名]
-**前置任务**：<编号> 完成后执行（无则删除此行）
-
----
+**状态**：待执行
+**执行环境**：本地 DS · <仓库名>
+（或：远端 <nickname> DS · <仓库名>）
 
 ## 前置知识
-
-- `code-agent/knowledge/<文件>.md` §<章节号>（L<起>-L<止>）— <与本任务的关联>
-
----
-
-## 背景
-
-<2-3 句话说明为什么需要这个任务，当前状态是什么>
-
----
+- `code-agent/knowledge/XX.md` §章节号 — 关联说明
 
 ## 任务描述
 
-### 步骤 1：<操作>
-<具体指令，包含命令或代码示例>
+### 背景
+[为什么需要这个任务，2-3 句]
 
-### 步骤 2：<操作>
-...
+### 约定（架构决策）
+[DS 无法从代码推断的选择]
 
----
+### 测试场景
+- 已有测试：必须保持通过 `llvm/test/CodeGen/Dadao/xxx.ll`
+- 新增测试：`新文件名.ll`，行为特征：[描述，不写 CHECK]
 
-## 失败处理
+## 验收条件
+[可运行的验证命令]
 
-**若 <场景>**：
-- <处理方式>
-
----
-
-## 输出要求
-
-1. <具体产出 1>
-2. <具体产出 2>
-3. 知识库更新：<若有新发现，更新哪个文件哪个章节>
-
----
-
-## 执行结果（由 AI 填写）
-
+## 完成区
+**状态**：
+**修改文件**：
+**验收结果**：
+**遗留问题**：
 ```
 
-### 编号规则
+### 4.3 知识库引用
 
-| 格式 | 用途 | 示例 |
-|------|------|------|
-| `001` | 独立任务 | `001-research-api.md` |
-| `035a` | 系列子任务 | `035a-init.md`, `035b-impl.md` |
-| `035a1` | 子任务的子步骤 | `035a1-debug.md` |
-
----
-
-## 6. 知识库管理
-
-知识库是 Claude 和 DS 之间共享的持久化信息，存放在 `code-agent/knowledge/`。
-
-### 组织原则
-
-- **按主题分文件**：每个主题一个文件，如 `01-project-structure.md`、`02-api-reference.md`
-- **不按任务分文件**：知识是提炼后的结论，不是任务日志
-- **变更日志**：`10-changelog.md` 记录每次更新，便于追踪
-
-### 什么内容放知识库
-
-| 放入知识库 | 不放知识库 |
-|-----------|-----------|
-| 已验证的 API 用法 | 任务执行过程 |
-| 踩坑记录与解决方案 | 临时调试信息 |
-| 架构决策及原因 | 推测性结论 |
-| 关键数据结构定义 | 单次使用的脚本 |
-
-### DS 使用知识库的规范
-
-任务文件中引用知识库**必须标行号范围**，减少 DS 加载无关内容：
+引用格式用章节号（`§3.1`），不用行号（行号会变）：
 
 ```markdown
 ## 前置知识
-- `code-agent/knowledge/04-api-reference.md` §4.3（L136-L180）— suKernelSetArgs 参数语义
-```
-
-不要写 `阅读整个知识库`，DS context 有限。
-
-### 知识库同步时机
-
-- DS 完成任务后，要求其将新发现更新到相关知识库章节
-- 任务文件归档（`/optimize`）前检查知识库是否已同步
-
----
-
-## 7. 多项目逻辑关系
-
-当工作涉及多个相互依赖的仓库时（如：核心库 + 多个适配器），
-需要建立明确的协作模式。
-
-### 典型拓扑：核心库 + 适配器
-
-```
-[核心库]  提供 API 和运行时
-    ↓ 依赖
-[适配器A]  如 PyTorch 后端
-[适配器B]  如 GGML 后端
-```
-
-每个仓库独立维护自己的 `DS.md` + `code-agent/`，
-DS 分配到具体仓库工作，不跨仓库操作。
-
-### 核心库变更 → 同步到适配器
-
-**标记机制**：核心库 `10-changelog.md` 条目末尾加 `[PUBLIC]`：
-
-```markdown
-- 2026-02-10: 修改 suKernelSetArgs 参数顺序，兼容性破坏 [PUBLIC]
-```
-
-Claude 看到 `[PUBLIC]` 标记后，将相关内容同步更新到各适配器的知识库章节。
-
-**同步清单**：在核心库 `code-agent/knowledge/00-sync-manifest.md` 维护映射关系：
-
-```markdown
-| 核心库章节 | 适配器A同步目标 | 适配器B同步目标 |
-|-----------|----------------|----------------|
-| §4.3 API  | pytorch/code-agent/knowledge/05-api.md §3 | ggml/code-agent/knowledge/05-api.md §7 |
-```
-
-### 适配器发现核心库 Bug → 上报
-
-**标记机制**：适配器任务结果含 `[CORE-BUG]`：
-
-```markdown
-## 执行结果
-[CORE-BUG] suQueueLaunch 在队列为空时返回 0 而非错误码，导致后续等待超时
-```
-
-Claude 看到 `[CORE-BUG]` 后，在核心库 `code-agent/tasks/` 创建对应修复任务。
-
-### 多仓库任务分配
-
-Claude 同时管理多个仓库的任务，但每次只给 DS 一个仓库的一个任务。
-
-**任务状态追踪**（在 Claude 的 memory 中维护，见 `ds-registry.md`）：
-
-```
-本地 DS              核心库:   任务 035e 进行中
-本地 DS · <仓库A>    适配器A:  任务 009  进行中
-远端 DS · <仓库B>    适配器B:  任务 049  进行中
-```
-
-不同 DS 会话的任务可以并行；同一 DS 会话内任务必须串行。
-
-### 远端机器上的仓库
-
-对于需要在特定硬件上运行的任务（如 gem5 模拟器），
-知识库需要手动同步：
-
-```bash
-# 将本地知识更新同步到远端机器
-rsync -av /path/to/repo/code-agent/knowledge/ \
-  user@remote-host:~/repo/code-agent/knowledge/
-
-# 将远端测试结果同步回本地
-rsync -av user@remote-host:~/repo/code-agent/knowledge/ \
-  /path/to/repo/code-agent/knowledge/
-```
-
-任务文件也需要同步后才能在远端执行：
-
-```bash
-rsync -av /path/to/repo/code-agent/tasks/ \
-  user@remote-host:~/repo/code-agent/tasks/
+- `code-agent/knowledge/02-llvm-backend-howto.md` §5 — LLVM 22 LowerCCCArguments 接口
 ```
 
 ---
 
-## 8. 会话管理
+## 5. 日常工作流
 
-Claude Code 使用持久化 memory 系统（`~/.claude/projects/-home-<user>/memory/`）跨会话保持状态，无需手动操作。
+### 5.1 下发任务
 
-Claude 在任务返回处理（architect skill §任务返回处理 步骤 5）时会自动评估是否有值得保留的发现，并更新对应 memory 文件。
+1. 创建任务文件
+2. 用 `/dispatch <task-id>` 生成标准下发指令
+3. 将指令复制给对应 DS 会话
 
-需要深度检查时，显式调用 `/review-task`：
-
-```
-/review-task <task-id>
-```
-
-执行后：
-- 读取任务完成区，提取技术结论
-- 对比并更新 `memory/project_*.md`、`memory/feedback_*.md`、MEMORY.md 索引
-- 按需更新知识库 `10-changelog.md` 和对应章节
-
-### /task — 查看任务状态
-
-快速查看当前进行中的任务：
+下发指令格式：
 
 ```
-/task
-```
-
-### /optimize — 归档与清理
-
-当任务列表积累过多时，归档已完成任务并同步知识库：
-
-```
-/optimize
-```
-
-执行后：
-- 已完成任务移入 `code-agent/tasks/archive/`
-- 重要发现同步到知识库
-
-**建议频率**：每完成 5-10 个任务后运行一次。
-
-### 框架仓库自动同步规则
-
-**框架仓库**：`~/claude-agent`（本仓库）
-
-凡修改以下文件后，Claude **必须立即**同步到框架仓库并 push，**无需用户确认**：
-
-| 修改的文件 | 同步到 claude-agent 的路径 |
-|-----------|--------------------------|
-| `~/.claude/skills/*/SKILL.md` | `skills/*/SKILL.md` |
-| `~/.claude/hooks/**` | `hooks/**` |
-
-```bash
-# 标准同步流程（skill 修改为例）
-cp ~/.claude/skills/<name>/SKILL.md ~/claude-agent/skills/<name>/SKILL.md
-cd ~/claude-agent
-git add skills/<name>/SKILL.md
-git commit -m "fix(<name>): 描述改动"
-git push origin main   # 框架仓库直接 push，无需用户确认
-```
-
-> **注意**：项目仓库（业务代码仓库）的 push 仍须用户确认。只有 `claude-agent` 框架仓库例外。
-
----
-
-## 9. AI 选型与下发
-
-### /assign-ai — 路由到 DS 或 Gemini
-
-框架同时支持 **DS**（能力强，token 有限）和 **Gemini**（token 几乎无限）。
-创建任务文件后，用 `/assign-ai` 决定派给谁：
-
-```
-/assign-ai <task-id 或任务描述>
-```
-
-路由规则（简版）：
-
-| 任务类型 | 推荐 AI |
-|---------|---------|
-| 简单调研、联网查资料 | Gemini 优先 |
-| 复杂多步推理、debug、大型实现 | DS |
-| Gemini 搞不定的 | DS 重做 |
-
-**`分配给` 字段标注规范**（任务文件头部）：
-
-| 标注 | 含义 |
-|------|------|
-| `本地 DS` | 主项目本地 DS 会话 |
-| `本地 DS · <仓库名>` | 指定仓库的本地 DS 会话 |
-| `远端 51 DS · <仓库名>` | 指定远端机器的 DS 会话 |
-| `Gemini` | 本地 Gemini（联网） |
-
-### /dispatch — 输出下发指令
-
-```
-/dispatch <task-id>
-```
-
-输出固定格式的下发指令，用户复制后发给对应 AI 会话：
-
-```
-## 下一步（→ 本地 DS）
-
-请将以下指令发送给 DeepSeek：
+## 下一步（→ 本地 DS · <仓库名>）
+AI：DeepSeek / Gemini（理由一句话）
 
 > 请先读取 DS.md，然后执行 code-agent/tasks/<文件名>.md
 ```
 
+### 5.2 任务返回处理
+
+用 `/rt <task-id>`（即 `/review-task`）：
+
+1. 读任务文件完成区
+2. 检查代码变更（`git status` + 读相关文件）
+3. 轻量问题直接修复，阻断问题报告用户
+4. 按需更新 memory 和知识库
+5. Review 通过 → 自动 commit（不自动 push）
+
+### 5.3 AI 选型
+
+| → DeepSeek | → Gemini |
+|-----------|---------|
+| 实现/修复/重构 | 调研/搜索 |
+| 多文件改动 | 构建/运行/测试 |
+| 调试排错 | 单文件只读 |
+| 算法实现 | 知识库整理 |
+
+### 5.4 多仓库并行
+
+不同 DS 会话的任务可并行；同一会话内串行（等上一个返回再发）。
+
+下发指令中每条必须标注目标会话，用户一眼看清。
+
+远端任务记得从 `gpt-registry.md` 路由表取 scp 命令，先同步任务文件再下发。
+
+### 5.5 知识库维护
+
+每次任务完成后检查是否需要更新知识库：
+- 新的 API 用法、踩坑记录 → 追加到对应章节
+- `10-changelog.md` 追加一行记录（格式：`| 日期 | 描述 | DS/Claude |`）
+- 纯测试修复、注释调整、知识库已覆盖 → 无需更新
+
 ---
 
-## 10. 项目管理
+## 6. 框架维护
 
-从 `~/` 启动 Claude 后，用 `/project-add` 和 `/project-remove` 管理哪些项目纳入协调。
+修改 `~/claude-agent/` 中的文件后，立即同步已部署的拷贝：
 
-### /project-add — 注册项目
+| 修改文件 | 同步目标 |
+|---------|---------|
+| `collab-framework/DS-common.md` | `~/.claude/collab-framework/DS-common.md` |
+| `memory-template/` | 仅新机器初始化时用，已有 memory 不覆盖 |
 
-```
-/project-add /path/to/myproject
-/project-add /path/to/myproject remote: user@host:/remote/path
-```
-
-Claude 会：
-1. 检查项目是否有 `DS.md` 和 `code-agent/`，缺失时给出补全命令（不阻止注册）
-2. 在 global memory（`MEMORY.md` + `ds-registry.md`）中添加项目拓扑、DS 实例、仓库条目
-3. 若有远端，同时注册 `远端 DS · <project-name>` 实例和 dispatch 路由
-
-### /project-remove — 注销项目
-
-```
-/project-remove myproject
-```
-
-Claude 会：
-1. 列出将从 memory 移除的条目，请用户确认
-2. 从 `MEMORY.md` 删除拓扑块、DS 实例行、仓库行
-3. 将 `ds-registry.md` 中的对应实例移至"历史停用实例"
-
-**不会修改任何项目文件**——`DS.md`、`code-agent/`、知识库、任务文件全部保留。
-随时可以重新 `/project-add` 恢复管理。
+框架仓库的 commit 和 push 均须用户确认（与项目仓库规则一致）。
 
 ---
 
-## 11. 常见场景示例
+## 7. 关键路径速查
 
-### 场景一：从零开始一个新功能
-
-```
-1. 用户：我想实现 XX 功能
-2. Claude（/architect）：
-   - 拆分为 3 个子任务：001a（调研）、001b（实现）、001c（验证）
-   - /assign-ai 001a → 派给 Gemini（调研联网）
-3. 用户 → Gemini：请先读取 GEMINI.md，然后执行 code-agent/tasks/001a-xxx.md
-4. Gemini 完成 001a，填写结果
-5. Claude Review，/assign-ai 001b → 派给 DS（实现）
-6. ...循环直到功能完成
-```
-
-### 场景二：调试一个已知现象的 bug
-
-```
-1. 用户：运行时 crash 在 XX 函数，提供了 stack trace
-2. Claude：
-   - 创建调研任务，/assign-ai → DS（需要多步推理定位根因）
-   - 允许插桩
-3. DS 定位根因，填写结论
-4. Claude：基于根因创建修复任务，/dispatch 输出下发指令
-5. DS 实现修复，Claude Review 修复代码
-```
-
-### 场景三：核心库 API 变更，适配器需要跟进
-
-```
-1. 核心库 DS 完成 API 变更任务，在 changelog 中标注 [PUBLIC]
-2. Claude 检查 changelog，识别 [PUBLIC] 条目
-3. Claude 更新各适配器的知识库对应章节
-4. Claude 为每个适配器创建跟进任务（说明 API 变更细节）
-5. /assign-ai 分别路由，下发给各适配器的 AI
-```
-
-### 场景四：新人接手项目
-
-```
-1. 安装 claude-agent（见安装章节）
-2. 打开项目目录，启动 Claude Code
-3. 阅读 code-agent/knowledge/ 了解项目知识（README.md 有主题索引）
-4. /task  ← 查看当前任务状态，了解进行中的工作
-5. 正常工作
-```
+| 用途 | 路径 |
+|------|------|
+| 通用 DS 规则 | `~/.claude/collab-framework/DS-common.md` |
+| DS 路由注册表 | `~/.claude/projects/-home-$(whoami)/memory/gpt-registry.md` |
+| 全局 memory 索引 | `~/.claude/projects/-home-$(whoami)/memory/MEMORY.md` |
+| 全局 CLAUDE.md | `~/.claude/CLAUDE.md` |
+| 新项目 DS.md 模板 | `~/claude-agent/collab-framework/DS-template.md` |
+| 新项目 code-agent 模板 | `~/claude-agent/collab-framework/code-agent/` |
