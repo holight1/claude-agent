@@ -14,10 +14,15 @@ echo "Repo  : ${REPO_DIR}"
 echo "Claude: ${CLAUDE_DIR}"
 echo ""
 
-# ── 1. WORKFLOW.md ────────────────────────────────────────────────────────────
-echo "[1/3] Installing WORKFLOW.md..."
+# ── 1. WORKFLOW.md + DS-common.md ────────────────────────────────────────────
+echo "[1/4] Installing WORKFLOW.md..."
 cp "${REPO_DIR}/WORKFLOW.md" "${CLAUDE_DIR}/WORKFLOW.md"
 echo "  + ~/.claude/WORKFLOW.md"
+
+echo "[2/4] Installing DS-common.md..."
+mkdir -p "${CLAUDE_DIR}/collab-framework"
+cp "${REPO_DIR}/collab-framework/DS-common.md" "${CLAUDE_DIR}/collab-framework/DS-common.md"
+echo "  + ~/.claude/collab-framework/DS-common.md"
 
 # 在 ~/.claude/CLAUDE.md 中注册（若不存在则创建，若已有 @WORKFLOW.md 则跳过）
 CLAUDE_MD="${CLAUDE_DIR}/CLAUDE.md"
@@ -31,8 +36,8 @@ else
     echo "  ~ ~/.claude/CLAUDE.md already has @WORKFLOW.md"
 fi
 
-# ── 2. RTK hook（由 RTK 工具自管理）─────────────────────────────────────────
-echo "[2/3] RTK hook..."
+# ── 3. RTK hook（由 RTK 工具自管理）─────────────────────────────────────────
+echo "[3/4] RTK hook..."
 if command -v rtk &>/dev/null; then
     rtk init --global 2>/dev/null && echo "  + rtk init --global OK" || echo "  ~ rtk init skipped"
 else
@@ -40,8 +45,8 @@ else
     echo "    https://github.com/anthropics/rtk"
 fi
 
-# ── 3. Memory 初始化（新机器）────────────────────────────────────────────────
-echo "[3/3] Memory..."
+# ── 4. Memory 初始化（新机器）────────────────────────────────────────────────
+echo "[4/4] Memory..."
 if [ ! -d "${MEMORY_DIR}" ]; then
     mkdir -p "${MEMORY_DIR}"
     cp "${REPO_DIR}/memory-template/MEMORY.md"              "${MEMORY_DIR}/MEMORY.md"
