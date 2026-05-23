@@ -129,9 +129,9 @@ AI：DeepSeek
 ```
 我：027d 返回了（/rt 027d）
 
-架构师：[读任务文件 ## Codex Review 最新 Round]
-        高：getTargetNodeName 漏了 BITCAST_FP_TO_RD case — 直接修复
-        中：—
+架构师：[读任务文件 ## 完成区]
+        状态：已完成，修改了 DadaoISelLowering.cpp
+        发现：getTargetNodeName 漏了 BITCAST_FP_TO_RD case — 直接修复
         [修复 + 运行 lit + 通过 → commit]
 ```
 

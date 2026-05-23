@@ -25,9 +25,7 @@
 
 ## DS Collaboration
 
-- DS 配置：DS.md
-- 协作协议：code-agent/ai-collaboration-framework.md
+- DS 配置与协作规范：DS.md（含 DS-common.md 引用）
 - 知识库：code-agent/knowledge/
-- 设计文档：code-agent/designs/
+- 设计文档：code-agent/designs/（可选）
 - 任务目录：code-agent/tasks/
-- Claude 架构师规范：~/.claude/skills/architect/SKILL.md

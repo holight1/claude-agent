@@ -15,17 +15,10 @@ mkdir -p ~/.claude/collab-framework
 cp ~/claude-agent/collab-framework/DS-common.md ~/.claude/collab-framework/DS-common.md
 ```
 
-### 1.2 注册框架到全局 CLAUDE.md
+### 1.2 初始化 Memory
 
-检查 `~/.claude/CLAUDE.md` 是否已有 `@WORKFLOW.md`（若已有则跳过）：
-
-```bash
-grep -q "@WORKFLOW.md" ~/.claude/CLAUDE.md 2>/dev/null || echo "@WORKFLOW.md" >> ~/.claude/CLAUDE.md
-```
-
-（若 `~/.claude/CLAUDE.md` 不存在，先确认用户的全局 `~/CLAUDE.md` 已就位，再处理。）
-
-### 1.3 初始化 Memory
+> **说明**：以下路径是 **Claude Code 专用** 的 memory 存储位置，由工作目录（`~/`）自动派生。
+> 其他架构师 Agent（Codex 等）有自己的 memory 机制，可跳过此步或自行适配。
 
 检查 memory 目录是否存在：
 
@@ -269,8 +262,8 @@ AI：DeepSeek（理由一句话）
 | 用途 | 路径 |
 |------|------|
 | 通用 DS 规则 | `~/.claude/collab-framework/DS-common.md` |
-| DS 路由注册表 | `~/.claude/projects/-home-$(whoami)/memory/gpt-registry.md` |
-| 全局 memory 索引 | `~/.claude/projects/-home-$(whoami)/memory/MEMORY.md` |
+| DS 路由注册表 | `~/.claude/projects/-home-$(whoami)/memory/gpt-registry.md`（Claude Code 专用路径） |
+| 全局 memory 索引 | `~/.claude/projects/-home-$(whoami)/memory/MEMORY.md`（Claude Code 专用路径） |
 | 全局 CLAUDE.md | `~/.claude/CLAUDE.md` |
 | 新项目 DS.md 模板 | `~/claude-agent/collab-framework/DS-template.md` |
 | 新项目 code-agent 模板 | `~/claude-agent/collab-framework/code-agent/` |
