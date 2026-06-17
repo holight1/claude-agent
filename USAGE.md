@@ -8,7 +8,7 @@
 
 用户在新机器上 clone 此仓库后，将以下步骤一次性完成：
 
-### 1.1 部署通用 DS 规则
+### 1.1 部署通用规则文件
 
 ```bash
 mkdir -p ~/.claude/collab-framework
@@ -44,7 +44,15 @@ cp ~/claude-agent/collab-framework/DS-common.md ~/.claude/collab-framework/DS-co
 
 每个项目仓库需要 `DS.md` + `code-agent/` 两件套。
 
-### 2.1 创建 DS.md
+### 2.1 创建 CODEX.md
+
+```bash
+cp ~/claude-agent/collab-framework/CODEX-template.md /path/to/project/CODEX.md
+```
+
+打开文件，替换 `[PROJECT_NAME]`，在"项目特有约束"节补充项目特有的禁读文件和已知接受状态。
+
+### 2.2 创建 DS.md
 
 从模板复制到项目根目录：
 
@@ -86,7 +94,28 @@ code-agent/
 
 ---
 
-## 3. 核心原则
+## 3. 协作模型
+
+### 3.0 四角色流水线
+
+```
+CC（任务设计）→ DS（实现）→ Codex（审查）→ CC（双重确认 + commit）
+```
+
+| 角色 | 职责 | 工具 |
+|------|------|------|
+| **CC**（Claude Code） | 架构决策、任务拆解、双重确认、commit | 长上下文 + memory + 工具调用 |
+| **DS**（DeepSeek） | 按任务文件实现，填写完成区 | 编码 + 验证 |
+| **Codex** | 代码审查，输出 `## Codex Review` | 只读 + 写 review 节 |
+
+**强制规则**：有代码改动的任务，`/rt` 在 Codex review 到达前不会继续（Branch B 会停下等待）。纯文档任务可跳过 Codex。
+
+Codex 的触发方式：CC 在 `/rt` 看到"无 Codex review"提示后，用户手动发送给 Codex：
+```
+> 请先读取 CODEX.md，然后 review code-agent/tasks/<文件名>.md
+```
+
+## 4. 核心原则（原 §3）
 
 ### 3.1 架构师职责
 
