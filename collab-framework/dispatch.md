@@ -31,15 +31,31 @@
 
 同步失败时报错，不继续输出下发指令。
 
-## 4. 输出下发指令
+## 4. AI 选型
+
+根据任务类型决定发给 **Gemini** 还是 **DeepSeek**：
+
+| → DeepSeek（更强，省着用） | → Gemini（无限量） |
+|--------------------------|------------------|
+| 实现/修复/重构（impl/fix/refactor） | 调研/搜索/recon |
+| 多文件改动 | 构建/运行/测试执行 |
+| 调试排错 | 单文件只读或结构化输出 |
+| 算法实现 & 结果验证 | 知识库整理/changelog |
+| 复杂配置脚本修改 | smoke test / 回归测试 |
+
+默认：调研 → Gemini；实现/调试 → DeepSeek。
+
+## 5. 输出下发指令
+
+指令中**必须标注目标 AI**（Gemini / DeepSeek）。
 
 ```
 ---
 ## 下一步（→ 本地/远端 <nickname> DS · <仓库名>）
 
-**AI：DeepSeek**（理由：一句话）
+**AI：Gemini / DeepSeek**（理由：一句话）
 
-请将以下指令发送给 DeepSeek：
+请将以下指令发送给 [Gemini / DeepSeek]：
 
 > 请先读取 DS.md，然后执行 code-agent/tasks/<完整文件名>.md
 ```

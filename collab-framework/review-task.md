@@ -27,10 +27,12 @@ scp [-P port] user@host:~/repo/code-agent/tasks/<file> ~/repo/code-agent/tasks/<
 ## 3. Review 代码（有代码改动时）
 
 ```bash
-git status          # 了解改动范围（含未跟踪的新文件）
+git status          # 了解改动范围；重点看有没有 D（删了之前能工作的文件/hook = 回归高频根因）
 ```
 
 按完成区列出的文件逐一读取，检查逻辑是否与任务设计一致。
+
+**独立复跑，不只读（关键）**：验收以**架构师亲自重跑的 ground-truth 为准**，完成区和自填的 `## Codex Review` 只是线索、可能与实际树不符。重 build、重跑测试/差分，`cmd; echo $?` 核退出码。「编过」≠「能跑」。防「凑绿」：`|| true` 吞退出码、删文件解锁、伪造构建/运行输出——一律打回。易造假域（模拟器内部、编译器 CodeGen）尤其亲自 build + 跑，任务文件里应已放硬门槛（贴真实输出 + 负测试）。
 
 **Review 分类**：
 
