@@ -1,0 +1,7 @@
+{
+  "task_id": "CF-001a",
+  "worker_tier": "luna-med",
+  "route": "gpt-5.6-luna/medium",
+  "values": [2, 3, 5, 7],
+  "checksum": 17
+}
