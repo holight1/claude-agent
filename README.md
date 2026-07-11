@@ -1,163 +1,44 @@
-# claude-agent
+# Codex Subagent Collaboration Framework
 
-多 AI 协作框架：架构师 Agent 负责设计和协调，DS 执行编码和调研任务。
+一套以 Codex 为协调者、以分级 subagent 为执行与审查单元的可追溯协作框架。
 
-架构师可以是 Claude / Codex / DS，任意具备长上下文和工具调用能力的 AI 均可担任。架构师设计接口、拆任务、Review 代码；DS 聚焦单一任务执行。任务文件是双方之间的"合同"——描述架构约束和验收条件，不写实现步骤，由 DS 读现有代码自行推导实现。
+核心分工：
 
----
+| 角色 | 默认模型 | 职责 |
+|---|---|---|
+| Coordinator | Codex | 定义任务合同、选择模型、隔离工作区、裁决审查、提交 |
+| Simple Worker | Luna Med | 机械、局部、低语义风险的实现或整理 |
+| Complex Worker | Terra Med | 需要调试、跨文件推理或系统语义理解的实现 |
+| Reviewer | Terra High | 独立审查所有代码和技术交付，复跑关键验收，不参与原实现 |
 
-## 前置条件
+框架不以“改动行数”判断复杂度，而以错误后果、语义耦合和验证难度判断。任务合同、执行证据和审查结论分别落盘，任何人都不能覆盖其他角色的记录。
 
-- 架构师 Agent（Claude Code / Codex 等，有工具调用和持久 memory 的 AI）
-- DeepSeek 访问权限（执行端，本地会话或远端机器均可）
+## 设计目标
 
----
+- 可追溯：能回答谁、用什么模型、基于哪个 revision、运行了什么、发现和修正了什么。
+- 可复现：验收命令、退出码、关键输出和环境事实都保存在 attempt/review 记录中。
+- 角色隔离：实现者不能宣布 review 通过；reviewer 不替实现者静默改代码。
+- 可恢复：会话中断后，只读任务状态和关联记录即可继续。
+- 轻量：任务 md 保持技术本位，通用流程只在框架文档中定义一次。
 
-## 快速开始
+## 快速入口
 
-```bash
-git clone <this-repo> ~/claude-agent
+- 操作流程：[USAGE.md](USAGE.md)
+- 框架文件说明：[collab-framework/README.md](collab-framework/README.md)
+- 协调者规则：[collab-framework/COORDINATOR.md](collab-framework/COORDINATOR.md)
+- 路由规则：[collab-framework/ROUTING.md](collab-framework/ROUTING.md)
+- 追溯协议：[collab-framework/TRACEABILITY.md](collab-framework/TRACEABILITY.md)
+
+## 项目内最小结构
+
+```text
+AGENTS.md
+code-agent/
+  tasks/       # 不可由 worker 改写的任务合同
+  attempts/    # worker 每次执行的事实记录
+  reviews/     # Terra High 每轮独立审查记录
+  decisions/   # 需要架构裁决时才创建
+  knowledge/   # 稳定技术知识，不存流水账
 ```
 
-然后把这句话发给架构师 Agent：
-
-> 请阅读 `~/claude-agent/USAGE.md`，按其中的 Setup 指南完成环境初始化，完成后告诉我做了哪些步骤。
-
-架构师会自动完成：部署通用规则文件（`DS-common.md`）、初始化 memory 记录。
-
----
-
-## 建议工作流：新仓库从调研开始
-
-> **建议**：接手一个新仓库时，第一个任务始终是调研，让 DS 读仓库结构、构建系统、关键模块边界，完成后架构师用调研结果补充 DS.md，再开始具体开发任务。
-
-```
-1. 初始 DS.md（仅角色 + 构建命令）
-2. 下发调研任务 → DS 读源码，总结仓库布局、关键接口、已知约束
-3. 架构师用调研结论补充 DS.md（仓库布局、任务编号规范、知识库初始章节）
-4. 后续开发任务 DS 可直接读 DS.md 快速上下文
-```
-
-设计阶段也建议（非强制）先落盘设计文档到 `code-agent/designs/<name>.md`，再从设计创建任务文件。好处是多个 DS 会话可以共享同一份设计背景。
-
----
-
-## 使用示例
-
-### 场景一：新仓库调研
-
-```
-我：llvm-unicore 新接手，先让 DS 摸底。
-
-架构师：好，创建调研任务。
-[创建 code-agent/tasks/001a-research-repo-structure.md]
-
----
-下一步（→ 本地 DS · llvm-unicore）
-AI：DeepSeek
-
-> 请先读取 DS.md，然后执行 code-agent/tasks/001a-research-repo-structure.md
-```
-
-DS 返回后：
-
-```
-我：001a 返回了
-
-架构师：[读完成区] DS 总结了：Target 目录结构、CMake 配置方式、已有测试套件位置。
-        [用结论补充 DS.md §仓库布局、§构建环境、§知识库初始化]
-        DS.md 已更新，可以开始开发任务。
-```
-
----
-
-### 场景二：实现一个功能
-
-```
-我：LLVM 后端需要支持 float 调用约定，DS 来实现。
-
-架构师：好，设计决策如下：
-        - f32/f64 参数通过 RF1-RF15 寄存器传递（Full LocInfo）
-        - 不走 BCvt 路径，避免无效 stt/ldt roundtrip
-        [（可选）落盘 code-agent/designs/float-cc.md]
-        [创建 code-agent/tasks/027c-implement-float-cc.md]
-        任务包含：架构决策 + 测试场景（新增 float-calling-conv.ll 的行为特征）
-
----
-下一步（→ 本地 DS · llvm-unicore）
-AI：DeepSeek
-> 请先读取 DS.md，然后执行 code-agent/tasks/027c-implement-float-cc.md
-```
-
-DS 实现后：
-
-```
-我：027c 返回了
-
-架构师：[读完成区] DS 实现了 LowerCCCArguments f32/f64 case，
-        新增 float-calling-conv.ll，CHECK-NOT stt 确认无无效 roundtrip。
-        发现一处测试断言口径不一致，直接修复。
-        lit 4/4 PASS → commit 027c。
-```
-
----
-
-### 场景三：多仓库并行推进
-
-```
-我：027d 和 196a 都可以并行，DS 各发一个。
-
-架构师：[创建两个任务文件]
-
----
-下一步（→ 本地 DS · repo-A）
-AI：DeepSeek
-> 请先读取 DS.md，然后执行 code-agent/tasks/027d-remove-dead-bitcast.md
-
----
-下一步（→ 远端 21 DS · repo-B）
-AI：DeepSeek
-> 请先读取 DS.md，然后执行 code-agent/tasks/196a-hotpath-analysis.md
-```
-
-不同会话的任务并行推进；同一会话内等上一个返回再发下一个。
-
----
-
-### 场景四：Review 返回结果
-
-```
-我：027d 返回了（/rt 027d）
-
-架构师：[读任务文件 ## 完成区]
-        状态：已完成，修改了 DadaoISelLowering.cpp
-        发现：getTargetNodeName 漏了 BITCAST_FP_TO_RD case — 直接修复
-        [修复 + 运行 lit + 通过 → commit]
-```
-
----
-
-## 文件结构
-
-```
-~/claude-agent/
-  README.md                        # 本文件（人读）
-  USAGE.md                         # 架构师 Agent Setup + 工作流参考（Agent 读）
-  collab-framework/
-    DS-common.md                   # 通用 DS 规则（部署到 ~/.claude/collab-framework/）
-    DS-template.md                 # 新项目 DS.md 模板
-    code-agent/                    # 新项目 code-agent/ 目录模板
-  memory-template/
-    MEMORY.md                      # 全局记忆初始模板
-    gpt-registry-template.md       # DS 实例注册表模板
-```
-
-各项目的 `DS.md` 和 `code-agent/` 随项目仓库携带，不在此目录中。
-
----
-
-## 更多参考
-
-- 架构师工作流完整参考 → `USAGE.md`
-- 通用 DS 规则 → `collab-framework/DS-common.md`
-- 各项目 DS.md → 对应仓库根目录
+初始化方法见 `USAGE.md`。本仓库只提供框架和模板，不保存具体项目的运行记录。

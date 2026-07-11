@@ -1,43 +1,15 @@
-# collab-framework — 模板目录
+# 框架目录
 
-存放可复用的初始化模板，用于新建项目的协作骨架。
+| 文件 | 用途 |
+|---|---|
+| `COORDINATOR.md` | Codex 协调者的完整操作规则 |
+| `ROUTING.md` | Luna Med / Terra Med / Terra High 选型与升级规则 |
+| `TRACEABILITY.md` | 文件布局、身份、revision、证据和状态机规范 |
+| `AGENTS-template.md` | 合并到具体项目的协作入口 |
+| `task-template.md` | 任务合同模板 |
+| `attempt-template.md` | worker 执行记录模板 |
+| `review-template.md` | Terra High 审查记录模板 |
+| `decision-template.md` | 架构裁决模板 |
+| `code-agent/README.md` | 项目内过程目录说明 |
 
----
-
-## 文件说明
-
-| 文件/目录 | 用途 |
-|-----------|------|
-| `DS-common.md` | 通用 DS 规则（部署到 `~/.claude/collab-framework/`） |
-| `DS-template.md` | 新项目 `DS.md` 模板 |
-| `CLAUDE-template.md` | 新项目 `CLAUDE.md` 模板（可选） |
-| `dispatch.md` | 下发任务流程描述 |
-| `review-task.md` | 任务返回处理流程描述 |
-| `code-agent/` | 新项目 `code-agent/` 目录骨架 |
-
----
-
-## 初始化新项目
-
-详细流程见 `../USAGE.md §2`，核心是两步：
-
-### 1. 创建 DS.md
-
-```bash
-cp ~/.claude/collab-framework/DS-template.md /path/to/project/DS.md
-```
-
-打开文件，替换占位符：
-
-- `[PROJECT_NAME]` → 项目名（如 `llvm-unicore`）
-- `[PREFIX]` → 任务文件前缀（如 `DL`，生成 `DL-001a-描述.md`）
-
-其余章节（仓库布局、知识库、工作规则）**先留空**，第一次调研任务完成后由架构师补充。
-
-### 2. 复制 code-agent/ 骨架
-
-```bash
-cp -r ~/.claude/collab-framework/code-agent/ /path/to/project/code-agent/
-```
-
-骨架包含：`tasks/`、`designs/`、`knowledge/README.md`、`knowledge/01-project-structure.md`、`knowledge/10-changelog.md`。
+这套框架刻意不提供某个供应商 CLI 的固定命令。Coordinator 应使用当前环境可用的 agent 调度接口，并把实际模型、agent 标识和工作区写入记录；调度能力不足时必须如实记录 fallback，不能把普通模型标成 Terra High。
