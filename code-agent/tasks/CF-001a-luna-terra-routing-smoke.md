@@ -1,6 +1,6 @@
 # CF-001a — Luna Medium → Terra High routing smoke
 
-**状态**：ready
+**状态**：blocked（Codex usage limit，预计 19:24 后重试）
 **优先级**：P0
 **风险标签**：local / process-smoke
 **建议 Worker**：Luna Med
@@ -78,3 +78,5 @@ git diff --check
 ## Timeline
 
 - 2026-07-11T16:20+08:00 created by Coordinator
+- 2026-07-11T16:21+08:00 dispatch A01 → `gpt-5.6-luna/medium`, thread `019f5043-c885-7f72-99ac-0dea69231495`
+- 2026-07-11T16:21+08:00 launch failed before worker execution → [A00 launcher record](../attempts/CF-001a/A00-launch-failure.md); no artifact or A01 created
