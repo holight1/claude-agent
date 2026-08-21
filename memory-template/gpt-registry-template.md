@@ -25,7 +25,6 @@
 |-------------|---------|---------|
 | `本地 DS · <仓库名>` | 无需传输 | 本地 DeepSeek |
 | `远端 <nickname> DS · <仓库名>` | `scp [-P <port>] <file> <user>@<host>:~/<仓库名>/code-agent/tasks/` | 远端 DeepSeek |
-| `本地 Gemini · <仓库名>` | 无需传输 | 本地 Gemini |
 
 ## 历史停用实例
 

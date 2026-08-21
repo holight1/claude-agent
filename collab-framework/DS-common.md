@@ -102,6 +102,53 @@
 
 ---
 
+## 安全清理规则（硬性，防 code-agent 被误删）
+
+**背景**：`code-agent/` 目录（tasks/、knowledge/、designs/）里存储调研产出、任务文件、跨仓契约文档，是架构师和 DS 的共享工作区。**这些文件在架构师 commit 之前长期以 untracked 状态存在**，任何无差别的 "清理 untracked 文件" 操作都会造成灾难性数据丢失。
+
+### 严禁使用的命令
+
+以下命令**绝对禁止**，无论出于什么目的：
+
+| 命令 | 危害 |
+|------|------|
+| `git clean -xfd` / `-xff` / `-fdX` | 递归删除 untracked 文件和目录，**会杀掉整个 code-agent/**（含所有调研产出） |
+| `git clean -fd` | 同上（少 -x 但仍杀 untracked） |
+| 任何 `git clean` 加 `-d` / `-f` / `-x` 组合 | 见上 |
+| `rm -rf` 未在任务文件明确列出的目录 | 潜在杀伤面无边界 |
+| `rm -rf $(pwd)` / `rm -rf .` / `rm -rf *` | 灾难性 |
+| `find . -delete` / `find . -exec rm` 无 filter | 同上 |
+
+### 安全清理的正确做法
+
+需要清理 build 产物或临时文件时，用**明确白名单**：
+
+```bash
+# 正确：只清指定目录 / 后缀
+make distclean                          # 用工程自带的清理 target
+make clean
+rm -rf build/                           # 只清 build/
+rm -rf /tmp/mywork/                     # 只清自己的临时目录
+find . -maxdepth 2 -name "*.o" -delete  # 明确后缀，限制深度
+
+# 需要用 git clean 时，先 dry-run + 白名单 pathspec
+git clean -nd -- build/ output/         # -n 是 dry-run，先看要删什么
+git clean -fd -- build/ output/         # 白名单，且不加 -x
+```
+
+**核心规则**：任何清理命令执行前，**必须问自己："这条命令会不会碰到 code-agent/ 目录？"** 只要不能百分百确定不碰，就换更保守的写法。
+
+### 出事怎么办
+
+若不慎误删 code-agent/：
+
+1. **不要**立刻做任何 git 操作（可能覆盖 reflog）
+2. **立刻在完成区写下事故报告**：什么命令、什么时机、丢了哪些文件、能不能从对话上下文重建
+3. 尝试从 shell history、任务文件、对话上下文重建产物
+4. 状态标 `部分完成` 或 `失败`（视重建情况），**不得**掩盖事故当作"已完成"
+
+---
+
 ## 遇到问题的查询顺序
 
 1. **先查知识库** `code-agent/knowledge/`（README.md 有索引）
