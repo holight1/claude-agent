@@ -57,7 +57,19 @@ git status          # 了解改动范围；重点看有没有 D（删了之前�
 
 ## 5. Commit
 
-Review 无阻断问题、轻量问题已修复、验收命令通过后：
+Review 无阻断问题、轻量问题已修复、验收命令通过后。
+
+**执行端已 commit 时**（默认情形，见 DS-common §git commit 边界）——它的 commit 是**装箱**，不是结论。先确认这一箱就是本任务的全部：
+
+```bash
+git log --oneline -3        # 执行端的 commit 是否只有本任务
+git show --stat <sha>       # 改动清单是否与完成区一致，有无越界文件
+git status --short          # 箱外还有没有残留（有 = 完成区不完整）
+```
+
+改动清单与完成区不符、或箱外有残留 → 打回，不要替它补 commit。核对无误后架构师在其上追加自己的改动并 commit（review 结论由架构师写，执行端不得代填）。
+
+**执行端未 commit 时**（上游 clone 等禁止 commit 的仓，或任务无代码产出）：
 
 ```bash
 git status          # 只纳入本任务相关文件

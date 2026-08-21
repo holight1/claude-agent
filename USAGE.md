@@ -34,7 +34,20 @@ cp ~/claude-agent/collab-framework/DS-common.md ~/.claude/collab-framework/DS-co
 
 其他架构师 Agent 按自己的 memory 机制初始化这两份内容即可，模板内容仅供参考。
 
-### 1.3 完成后汇报
+### 1.3 部署 Skill 加载路径
+
+判断型 skill 的规范源在 `~/claude-agent/skills/`，启用池在 `~/claude-agent/enabled/`。三个客户端都从启用池取，不各存一份：
+
+```bash
+~/claude-agent/scripts/sync-skills.sh          # 校验 + 投影
+~/claude-agent/scripts/sync-skills.sh --check  # 只校验，不动客户端目录
+```
+
+它做三件事：校验规范源（frontmatter、状态闭集、正文不含具体项目命令）、校验启用池（无悬空链接、只有 `enabled` 状态可入池）、把启用池投影到 Claude Code 与 Codex。**opencode 的配置由人工添加**，脚本只打印需要加的那一行——不改写含密钥的用户配置。
+
+制度与补写顺序见 `skills/README.md`。
+
+### 1.4 完成后汇报
 
 列出已执行的步骤（跳过的说明"已存在"），告知用户下一步是添加项目仓库。
 
@@ -178,7 +191,7 @@ Review 中阻断问题（设计不符、ABI 破坏、多文件重构）：报告
 
 | 文件 | 内容 | 维护者 |
 |------|------|--------|
-| `~/.claude/collab-framework/DS-common.md` | 通用规则（不 commit、完成区格式、查询顺序） | 此仓库统一维护 |
+| `~/.claude/collab-framework/DS-common.md` | 通用规则（commit 边界、完成区格式、安全清理、查询顺序） | 此仓库统一维护 |
 | 项目根目录 `DS.md` | 项目 context（角色、布局、构建、任务编号、项目特有规则） | 架构师随项目演进补充 |
 
 DS.md 只写项目特有内容，通用规则通过引用 DS-common.md 获取。
@@ -302,6 +315,7 @@ AI：DeepSeek（理由一句话）
 |---------|---------|
 | `collab-framework/DS-common.md` | `~/.claude/collab-framework/DS-common.md` |
 | `memory-template/` | 仅新机器初始化时用，已有 memory 不覆盖 |
+| `skills/` 或 `enabled/` | 跑 `scripts/sync-skills.sh` |
 
 框架仓库的 commit 和 push 均须用户确认（与项目仓库规则一致）。
 
@@ -317,3 +331,5 @@ AI：DeepSeek（理由一句话）
 | 全局 CLAUDE.md | `~/.claude/CLAUDE.md` |
 | 新项目 DS.md 模板 | `~/claude-agent/collab-framework/DS-template.md` |
 | 新项目 code-agent 模板 | `~/claude-agent/collab-framework/code-agent/` |
+| Skill 规范源 / 启用池 | `~/claude-agent/skills/` · `~/claude-agent/enabled/` |
+| Skill 投影脚本 | `~/claude-agent/scripts/sync-skills.sh` |
