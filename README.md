@@ -146,13 +146,53 @@ AI：DeepSeek
   collab-framework/
     DS-common.md                   # 通用 DS 规则（部署到 ~/.claude/collab-framework/）
     DS-template.md                 # 新项目 DS.md 模板
+    CODEX-template.md              # 新项目 CODEX.md 模板（独立 reviewer）
+    CLAUDE-template.md             # 新项目 CLAUDE.md 模板
+    dispatch.md                    # 下发流程
+    review-task.md                 # 验收流程
     code-agent/                    # 新项目 code-agent/ 目录模板
+  skills/<name>/SKILL.md           # 判断型 skill 的规范源（制度见 skills/README.md）
+  enabled/<name> -> ../skills/...  # 启用池：链接在 = 已启用
+  decisions/                       # 框架决策记录（制度见 decisions/README.md）
+  scripts/
+    check-framework.sh             # 总门禁：skill + 决策记录 + 工作树守卫
+    sync-skills.sh                 # skill 校验与三客户端投影
+    check-decisions.sh             # 决策记录校验
   memory-template/
     MEMORY.md                      # 全局记忆初始模板
     gpt-registry-template.md       # DS 实例注册表模板
 ```
 
 各项目的 `DS.md` 和 `code-agent/` 随项目仓库携带，不在此目录中。
+
+---
+
+## 谁是什么的权威源
+
+同一条信息只有一个可编辑源。改错地方会造成两份各自漂移，而漂移不会被任何门禁发现。
+
+| 内容 | 权威源 | 说明 |
+|---|---|---|
+| 通用执行端规则 | `collab-framework/DS-common.md` | 改完必须同步到 `~/.claude/collab-framework/` |
+| 独立 reviewer 的通用检查 | `collab-framework/CODEX-template.md` | 项目 `CODEX.md` 从它初始化 |
+| 判断程序（需要判断，不是固定步骤） | `skills/<name>/SKILL.md` | 不得写具体项目命令 |
+| 某条 skill 是否启用 | `enabled/` 里有没有链接 | 不看 frontmatter |
+| **改框架的理由** | `decisions/` | 项目任务文件只留指针 |
+| 变更轨迹 | `git log` | 不设追加式变更日志 |
+| 项目专属命令、路径、写入策略 | 该项目的 `DS.md` / `CODEX.md` | 可覆盖框架默认，覆盖须写明理由 |
+
+**项目层立的纪律，当轮判定通用还是项目特有。** 通用的同轮回流到 `DS-common.md` / `CODEX-template.md`，不回流该项整改不算完成。判据：换一个项目，这条还成立吗？
+
+---
+
+## 框架自身的门禁
+
+```bash
+scripts/check-framework.sh --check    # 只校验
+scripts/check-framework.sh            # 校验 + 投影 skill 到三个客户端
+```
+
+**框架仓由多个架构师会话共写**（各自坐在不同项目根上），所以工作树不留未提交状态——改完当轮 commit（不 push），message 首行标明来源工作区。理由见 `decisions/2026-08-21-framework-repo-shared-by-sessions.md`。
 
 ---
 

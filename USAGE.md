@@ -316,6 +316,11 @@ AI：DeepSeek（理由一句话）
 | `collab-framework/DS-common.md` | `~/.claude/collab-framework/DS-common.md` |
 | `memory-template/` | 仅新机器初始化时用，已有 memory 不覆盖 |
 | `skills/` 或 `enabled/` | 跑 `scripts/sync-skills.sh` |
+| 任何框架文件 | 跑 `scripts/check-framework.sh`，并当轮 commit（不 push） |
+
+**改框架前后都跑 `scripts/check-framework.sh`。** 它校验 skill、校验决策记录、并守卫工作树——本仓被多个架构师会话共写，未提交状态会被下一个会话误扫进自己的提交或误删。
+
+**改动触及行为、约定、流程、工具或持久格式时，写一条 `decisions/` 记录。** 判定闭集与写法见 skill `decision-record-authoring` 与 `decisions/README.md`。
 
 框架仓库的 commit 和 push 均须用户确认（与项目仓库规则一致）。
 
@@ -333,3 +338,5 @@ AI：DeepSeek（理由一句话）
 | 新项目 code-agent 模板 | `~/claude-agent/collab-framework/code-agent/` |
 | Skill 规范源 / 启用池 | `~/claude-agent/skills/` · `~/claude-agent/enabled/` |
 | Skill 投影脚本 | `~/claude-agent/scripts/sync-skills.sh` |
+| 框架总门禁 | `~/claude-agent/scripts/check-framework.sh` |
+| 框架决策记录 | `~/claude-agent/decisions/` |
