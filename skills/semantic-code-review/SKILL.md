@@ -6,7 +6,8 @@ description: Use when reviewing a code diff or implementation task — pins the 
 # 语义化代码审查
 
 **状态**：enabled
-**消费者**：独立 reviewer（读各仓 `CODEX.md`）+ 架构师终审
+**消费者**：独立 reviewer + 架构师终审
+**载体**：三个宿主的 skill 加载路径都指向同一个启用池（`~/.claude/skills`、`~/.codex/skills`、opencode 的 `skills.paths`）。项目 `CODEX.md` **显式放行**读取 `~/claude-agent/enabled/*/SKILL.md`——skill 是角色中立的判断程序，不是架构师对某次改动的框定
 **来源**：dsh `dsh-code-review`；正文于 2026-08-21 补写，触发事件见 §附录
 **核心判断**：这个改动在**真实入口**上跑起来会怎样，而不是在测试里怎样？
 
@@ -84,6 +85,16 @@ description: Use when reviewing a code diff or implementation task — pins the 
 ⇒ 每次审查**至少留一部分不依赖任务书**：直接回到设计基线、规格文件与代码本身核对。
 
 具体做法：挑 2–3 个关键数值/算法，**自己独立算一遍**，与实现输出对照。不是"对着验收表打勾"。
+
+### 4.1 本清单同样有盲区
+
+**本 skill 由架构师侧编写。** 一份检查清单盖不住**它自己不知道的那一类失败**——§2 的第三类就是在一整类被漏掉之后才补进来的，在那之前清单看起来是完备的。
+
+⇒ 用它，但**发现清单之外的问题照样报**，并注明「不在清单内」。报上来的清单外问题是本 skill 下一次修订的来源；按 `process-gap-capture` 落一条 process-note。
+
+这与「审查不能只依赖任务书」是同一条原理向上再走一层：**判据的作者也在被审查的那条链上。**
+
+> 载体矛盾的来由与处置：`~/claude-agent/decisions/2026-08-21-reviewer-reads-framework-skills.md`
 
 ---
 

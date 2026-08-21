@@ -85,7 +85,10 @@ n_in=0; n_ext=0; n_skip=0; warn=0
 for f in $SCAN; do
   while IFS= read -r ref; do
     [ -n "$ref" ] || continue
-    case "$ref" in *'<'*|*'>'*) n_skip=$((n_skip + 1)); continue ;; esac  # 模板占位符
+    case "$ref" in *'<'*|*'>'*) n_skip=$((n_skip + 1)); skipped="$skipped$ref
+"; continue ;; esac  # 模板占位符
+    # 含 glob 的引用：退到第一个 * 之前的目录检查，不整条放过
+    case "$ref" in *'*'*) ref="${ref%%\**}"; ref="${ref%/}" ;; esac
     case "$ref" in
       "~/"*)   n_ext_or_in=1; abs="$HOME/${ref#\~/}" ;;
       "/"*)    n_ext_or_in=1; abs="$ref" ;;
