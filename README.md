@@ -146,7 +146,7 @@ AI：DeepSeek
   collab-framework/
     DS-common.md                   # 通用 DS 规则（部署到 ~/.claude/collab-framework/）
     DS-template.md                 # 新项目 DS.md 模板
-    CODEX-template.md              # 新项目 CODEX.md 模板（独立 reviewer）
+    REVIEWER-template.md           # 新项目 REVIEWER.md 模板（独立 reviewer）
     CLAUDE-template.md             # 新项目 CLAUDE.md 模板
     dispatch.md                    # 下发流程
     review-task.md                 # 验收流程
@@ -174,14 +174,14 @@ AI：DeepSeek
 | 内容 | 权威源 | 说明 |
 |---|---|---|
 | 通用执行端规则 | `collab-framework/DS-common.md` | 改完必须同步到 `~/.claude/collab-framework/` |
-| 独立 reviewer 的通用检查 | `collab-framework/CODEX-template.md` | 项目 `CODEX.md` 从它初始化 |
+| 独立 reviewer 的通用检查 | `collab-framework/REVIEWER-template.md` | 项目 `REVIEWER.md` 从它初始化 |
 | 判断程序（需要判断，不是固定步骤） | `skills/<name>/SKILL.md` | 不得写具体项目命令 |
 | 某条 skill 是否启用 | `enabled/` 里有没有链接 | 不看 frontmatter |
 | **改框架的理由** | `decisions/` | 项目任务文件只留指针 |
 | 变更轨迹 | `git log` | 不设追加式变更日志 |
-| 项目专属命令、路径、写入策略 | 该项目的 `DS.md` / `CODEX.md` | 可覆盖框架默认，覆盖须写明理由 |
+| 项目专属命令、路径、写入策略 | 该项目的 `DS.md` / `REVIEWER.md` | 可覆盖框架默认，覆盖须写明理由 |
 
-**项目层立的纪律，当轮判定通用还是项目特有。** 通用的同轮回流到 `DS-common.md` / `CODEX-template.md`，不回流该项整改不算完成。判据：换一个项目，这条还成立吗？
+**项目层立的纪律，当轮判定通用还是项目特有。** 通用的同轮回流到 `DS-common.md` / `REVIEWER-template.md`，不回流该项整改不算完成。判据：换一个项目，这条还成立吗？
 
 ---
 

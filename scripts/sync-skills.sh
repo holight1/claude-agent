@@ -121,10 +121,33 @@ else
     done
     for nm in "${enabled_names[@]:-}"; do
       [ -n "$nm" ] || continue
-      [ -L "$CODEX_DIR/$nm" ] || ln -s "$SRC/$nm" "$CODEX_DIR/$nm"
+      want="$SRC/$nm"; link="$CODEX_DIR/$nm"
+      if [ -L "$link" ]; then
+        cur="$(readlink "$link")"
+        if [ "$cur" = "$want" ]; then
+          :
+        elif case "$cur" in "$SRC"/*) true ;; *) false ;; esac; then
+          rm "$link" && ln -s "$want" "$link" || { fail "Codex: 无法修正 $nm 的链接"; continue; }
+          echo "  Codex: 修正 $nm（原指向 $cur）"
+        else
+          fail "Codex: $link 是指向本仓之外的链接（$cur），不覆盖，请人工处理"
+          continue
+        fi
+      elif [ -e "$link" ]; then
+        fail "Codex: $link 已存在且不是符号链接，不覆盖，请人工处理"
+        continue
+      else
+        ln -s "$want" "$link" || { fail "Codex: 创建 $nm 链接失败"; continue; }
+      fi
+      # 建完必须复核实际指向，不能因为命令没报错就算数
+      [ "$(readlink "$link" 2>/dev/null)" = "$want" ] || { fail "Codex: $nm 链接未指向 $want"; continue; }
       n_codex=$((n_codex + 1))
     done
-    echo "  Codex: $n_codex 个链接就位于 $CODEX_DIR"
+    if [ "$n_codex" -eq "${#enabled_names[@]}" ]; then
+      echo "  Codex: $n_codex 个链接已复核指向，位于 $CODEX_DIR"
+    else
+      echo "  Codex: 仅 $n_codex/${#enabled_names[@]} 个链接可用（见上方 FAIL）"
+    fi
   else
     echo "  Codex: $CODEX_DIR 不存在，跳过"
   fi
@@ -133,14 +156,20 @@ fi
 # opencode：配置项指绝对路径。本脚本**不改写**含密钥的用户配置，
 # 但必须把「没配」变成一条会失败的校验 —— 否则启用池与 opencode 配置
 # 各自漂移且无人发现（2026-08-21 sim SIM-001a 终审 C5）。
+# opencode：必须解析 JSONC 后核对顶层 skills.paths，不能用字符串搜索——
+# 注释掉的配置同样会被 grep 命中，那是把失败报成成功。
 if [ ! -f "$OPENCODE_CFG" ]; then
   echo "  opencode: $OPENCODE_CFG 不存在，跳过"
-elif grep -q "$ENABLED" "$OPENCODE_CFG"; then
-  echo "  opencode: 配置已指向 $ENABLED"
+elif ! command -v python3 >/dev/null 2>&1; then
+  fail "opencode: 缺 python3，无法解析 JSONC 配置 —— 本项无法校验，不按通过处理"
 else
-  fail "opencode 配置未指向启用池 —— 请在 $OPENCODE_CFG 顶层加入（本脚本不改写含密钥的用户配置）:
-            \"skills\": { \"paths\": [\"$ENABLED\"] }"
+  oc_out="$(python3 "$ROOT/scripts/_opencode_skills_path.py" "$OPENCODE_CFG" "$ENABLED" 2>&1)"
+  case "$oc_out" in
+    OK*)   echo "  opencode: 顶层 skills.paths 已含 $ENABLED" ;;
+    *)     fail "opencode: $oc_out
+            请在 $OPENCODE_CFG 顶层加入（本脚本不改写含密钥的用户配置）:
+            \"skills\": { \"paths\": [\"$ENABLED\"] }" ;;
+  esac
 fi
-
 echo "== 结果：$n_src 个规范源 / $n_enabled 个启用 / $errors 处错误 =="
 [ "$errors" -eq 0 ] || exit 1

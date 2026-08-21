@@ -7,7 +7,7 @@ description: Use when reviewing a code diff or implementation task — pins the 
 
 **状态**：enabled
 **消费者**：独立 reviewer + 架构师终审
-**载体**：三个宿主的 skill 加载路径都指向同一个启用池（`~/.claude/skills`、`~/.codex/skills`、opencode 的 `skills.paths`）。项目 `CODEX.md` **显式放行**读取 `~/claude-agent/enabled/*/SKILL.md`——skill 是角色中立的判断程序，不是架构师对某次改动的框定
+**载体**：三个宿主的 skill 加载路径都指向同一个启用池（`~/.claude/skills`、`~/.codex/skills`、opencode 的 `skills.paths`）。项目 `REVIEWER.md` **显式放行**读取 `~/claude-agent/enabled/*/SKILL.md`——skill 是角色中立的判断程序，不是架构师对某次改动的框定
 **来源**：dsh `dsh-code-review`；正文于 2026-08-21 补写，触发事件见 §附录
 **核心判断**：这个改动在**真实入口**上跑起来会怎样，而不是在测试里怎样？
 

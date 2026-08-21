@@ -4,7 +4,7 @@
 **日期**：2026-08-21
 **触发**：sim SIM-001a 终审的 R1——一个硬编码默认值逃过了防魔数检查，成因是任务书验收表的常量清单用「…」省略号写得不完整。实现、测试、独立审查三方**一起对着残缺规格「全部正确」**。
 **证据**：`~/sim/tasks/SIM-001a-spec-ir-determinism.md` §架构师终审 §2（R1–R3 三条整改的原文与判据）、§8.1（逐条归因表）。整改落点见 `~/sim/tasks/SIM-001b-engine-resources-report.md` §A。**本仓不复制其内容，以该文件为准。**
-**作用面**：`skills/task-acceptance-replay/SKILL.md`、`skills/task-contract-design/SKILL.md`、`collab-framework/CODEX-template.md`。
+**作用面**：`skills/task-acceptance-replay/SKILL.md`、`skills/task-contract-design/SKILL.md`、`collab-framework/REVIEWER-template.md`。
 
 ## 决定
 
@@ -32,6 +32,6 @@
 
 ## 验收证据
 
-`task-acceptance-replay` 新增 §6「合同盲区」与 §5 的反例证伪触发清单；`task-contract-design` 的作弊搜索路径表新增「用省略号写不完整的清单」一条；`CODEX-template.md` 同步。
+`task-acceptance-replay` 新增 §6「合同盲区」与 §5 的反例证伪触发清单；`task-contract-design` 的作弊搜索路径表新增「用省略号写不完整的清单」一条；`REVIEWER-template.md` 同步。
 
 反例证伪法本身的有效性有现场证据：sim 终审用它一击击破了一条全绿的确定性测试——把实现换成忽略入参的坏版本，该测试照样全绿。

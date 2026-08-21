@@ -35,6 +35,6 @@
 
 路径解析已实证：`~/.claude/skills -> enabled -> ../skills/<name>` 两跳可读；Codex 侧逐个链接就位；opencode 配置为绝对路径 `/home/suiyan/claude-agent/enabled`。
 
-**端到端验证**：用户 2026-08-21 告知 sim 侧已完成 DS 会话内的 skill 加载验证。**本仓可见的证据文件尚未更新**——`~/sim/tasks/SIM-001a-spec-ir-determinism.md` §8.5 与 §9 的 C5 截至读取时仍标 ⏳ 待办。以 sim 侧记录为准；本仓不代写它没写的结论。
+**端到端验证**：sim 侧已完成 DS 会话内的 skill 加载验证（用户 2026-08-21 确认）。本仓未持有该验证的输出，`~/sim` 的记录是其权威源。
 
-**已知矛盾（未决）**：`semantic-code-review` 自述消费者是「读各仓 `CODEX.md` 的独立 reviewer」，而 `CODEX-template.md §禁止事项` 写着「收到『请先读取 CODEX.md』时，只读 `CODEX.md`，不读其他 MD 文件」。照模板初始化的新项目里，该 skill **按设计不可达**。sim 的实际做法是把 skill 正文抄进项目 `CODEX.md`，于是同一段判据有了两份手工同步的副本。已处置：改禁令措辞，见 `2026-08-21-reviewer-reads-framework-skills.md`。
+**载体矛盾**：`semantic-code-review` 的自述消费者与 `REVIEWER-template.md` 的禁读条款曾互相矛盾，导致该 skill 在照模板初始化的项目里按设计不可达。已处置——禁令收窄为「禁读架构师上下文」并显式放行启用池，见 `2026-08-21-reviewer-reads-framework-skills.md`。

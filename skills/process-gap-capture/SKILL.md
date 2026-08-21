@@ -40,7 +40,7 @@ description: Use whenever a task exposes a defect in the collaboration process i
 
 🔴 **不直接修改 `~/claude-agent`。** 项目会话只负责把缺口记录成**可采纳的建议**；框架改动权在用户。
 
-项目的 `CODEX.md` / `CLAUDE.md` / `DS.md` 可以先改以止血，但记录里必须写明「本仓已临时落地，框架未同步」——否则两边会漂，而漂移不会被任何门禁发现。
+项目的 `REVIEWER.md` / `CLAUDE.md` / `DS.md` 可以先改以止血，但记录里必须写明「本仓已临时落地，框架未同步」——否则两边会漂，而漂移不会被任何门禁发现。
 
 🔴 **一条记录只写一个缺口。** 合并会让采纳时无法逐条取舍。
 
@@ -53,7 +53,7 @@ description: Use whenever a task exposes a defect in the collaboration process i
   → code-agent/process-notes/NNNN-*.md      项目会话记录，不改框架
   → 用户采纳
   → ~/claude-agent 改动 + decisions/ 记录    承接会话执行，记录引用那条 process-note
-  → 回流判定：通用 → DS-common / CODEX-template
+  → 回流判定：通用 → DS-common / REVIEWER-template
 ```
 
 两端各有一条硬规矩把住：项目侧**不直接改框架**，框架侧**改动必须有 decisions/ 记录且不复制项目内容、只引用**。中间任何一段断了，下一个人就只看得到规则、看不到规则为什么长这样。
@@ -67,6 +67,8 @@ description: Use whenever a task exposes a defect in the collaboration process i
 
 ## 停止条件
 
-- 写不出「本可以拦住它的是什么」→ 先想清楚，别记半条
+- 写不出「本可以拦住它的是什么」**是因为还没想清楚** → 先想清楚，别记半条
+
+  ⚠️ **「当前无」本身是合法答案，而且往往是最有价值的那一类**——全新形态的流程缺口就该没有对应控制（0001 正是如此）。要求是写清**为什么当前没有任何东西能拦住它**：最接近的机制是哪个、它为什么差一口气。停止条件针对的是「没想清楚」，不是「答案是没有」。
 - 建议是「以后要更仔细」→ 不是可采纳的改动，重写或丢弃
 - 该缺口已有记录 → **追加到既有记录**，不新开一条

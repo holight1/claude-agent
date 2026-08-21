@@ -13,11 +13,11 @@
 | note | 采纳为 |
 |---|---|
 | 0001 流程缺口无独立通道 | 新增 skill `process-gap-capture`（enabled）+ `code-agent/` 模板加 `process-notes/` + `DS-common` 加「流程缺口 vs 实现缺陷」一节 |
-| 0002 审查清单缺第三类失败 | **本轮之前已采纳**：`DS-common` §6、`CODEX-template` 三类失败表、`semantic-code-review` §2 |
+| 0002 审查清单缺第三类失败 | **本轮之前已采纳**：`DS-common` §6、`REVIEWER-template` 三类失败表、`semantic-code-review` §2 |
 | 0003 验收点只写机制不写充分性 | `task-contract-design` §1 加充分性强制项与「最弱实现」判据、作弊路径表加两条；`task-acceptance-replay` 把「互为负测试」升级为终审必做步骤 |
 | 0004 防造假机制自身的作用集合无人审 | `semantic-code-review` 新增 §3.1「规则 + 作用集合」，点名 derive 值与「手工列举改自动生成后边界不可见」 |
 
-同时补全闭环：**项目侧记录缺口不改框架 → 用户采纳 → 框架侧改动并写 `decisions/` 记录（引用不复制）→ 判定通用则回流 `DS-common` / `CODEX-template`。** 两端各有一条硬规矩把住，中间任何一段断了，下一个人就只看得到规则、看不到规则为什么长这样。
+同时补全闭环：**项目侧记录缺口不改框架 → 用户采纳 → 框架侧改动并写 `decisions/` 记录（引用不复制）→ 判定通用则回流 `DS-common` / `REVIEWER-template`。** 两端各有一条硬规矩把住，中间任何一段断了，下一个人就只看得到规则、看不到规则为什么长这样。
 
 ## 为什么
 

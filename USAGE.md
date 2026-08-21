@@ -57,13 +57,15 @@ cp ~/claude-agent/collab-framework/DS-common.md ~/.claude/collab-framework/DS-co
 
 每个项目仓库需要 `DS.md` + `code-agent/` 两件套。
 
-### 2.1 创建 CODEX.md
+### 2.1 创建 REVIEWER.md
 
 ```bash
-cp ~/claude-agent/collab-framework/CODEX-template.md /path/to/project/CODEX.md
+cp ~/claude-agent/collab-framework/REVIEWER-template.md /path/to/project/REVIEWER.md
 ```
 
 打开文件，替换 `[PROJECT_NAME]`，在"项目特有约束"节补充项目特有的禁读文件和已知接受状态。
+
+⚠️ **过渡期**：本文件 2026-08-21 由 `CODEX.md` 更名为 `REVIEWER.md`，同时审查节名由 `## Codex Review` 统一为 `## 独立审查`。**既有项目仍是旧名**，由各项目会话在下次同步框架时改，改的时候连 `DS.md` 里的引用和任务文件的节名一起改。**以该项目实际存在的文件名为准**，不要两个名字都写。
 
 ### 2.2 创建 DS.md
 
@@ -112,13 +114,13 @@ code-agent/
 ### 3.0 四角色流水线
 
 ```
-CC（任务设计）→ DS（实现）→ Codex（审查）→ CC（双重确认 + commit）
+CC（任务设计）→ 执行端（实现 + 本地 commit）→ 独立审查 → CC（复跑验收 + 收尾 commit）
 ```
 
 | 角色 | 职责 | 工具 |
 |------|------|------|
-| **CC**（Claude Code） | 架构决策、任务拆解、双重确认、commit | 长上下文 + memory + 工具调用 |
-| **DS**（DeepSeek） | 按任务文件实现，填写完成区 | 编码 + 验证 |
+| **CC**（Claude Code） | 架构决策、任务拆解、复跑验收、收尾 commit、push | 长上下文 + memory + 工具调用 |
+| **DS**（DeepSeek） | 按任务文件实现，填写完成区，**为本任务做本地 commit（不 push）** | 编码 + 验证 |
 | **Subagent**（架构师执行分身） | 复杂 / 框架内部 / 验证关键任务的实现——保有架构师上下文、独立跑通并自审 | 全工具 + 隔离会话 |
 | **Codex** | 代码审查，输出 `## Codex Review` | 只读 + 写 review 节 |
 
@@ -126,7 +128,7 @@ CC（任务设计）→ DS（实现）→ Codex（审查）→ CC（双重确认
 
 Codex 的触发方式：CC 在 `/rt` 看到"无 Codex review"提示后，用户手动发送给 Codex：
 ```
-> 请先读取 CODEX.md，然后 review code-agent/tasks/<文件名>.md
+> 请先读取 REVIEWER.md，然后 review code-agent/tasks/<文件名>.md
 ```
 
 ### 3.5 Subagent 与独立验证（实战补充）
@@ -281,10 +283,12 @@ AI：DeepSeek（理由一句话）
 详细流程见 `collab-framework/review-task.md`。核心步骤：
 
 1. 远端任务先 scp 拉回最新任务文件
-2. 读完成区，确认状态和遗留问题
-3. Review 代码（有改动时）：轻量问题直接修复，阻断问题报告用户
-4. 更新 memory 和知识库
-5. Review 通过 → commit（不自动 push）
+2. 读完成区，确认状态和遗留问题——**它们是线索，不是结论**
+3. **亲自复跑**取 ground truth，按 skill `task-acceptance-replay`；执行端已 commit 时先核对箱内清单与完成区是否一致、箱外有无残留（跨仓项目按两个仓分别核）
+4. Review 代码（有改动时）：轻量问题直接修复，阻断问题报告用户
+5. 更新 memory 和知识库
+6. 终审必做最后一步：本轮发现能指回任务设计的哪一条？指不出来按 `process-gap-capture` 落 process-note
+7. 通过 → 架构师做收尾 commit（**不自动 push**；执行端自己那个 commit 不代表通过）
 
 ### 5.3 DS 实例选择
 

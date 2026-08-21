@@ -13,6 +13,8 @@ SECTIONS="## 决定|## 为什么|## 备选方案|## 验收证据"
 
 errors=0
 fail() { printf '  [FAIL] %s\n' "$1"; errors=$((errors + 1)); }
+declare -A STATUS_OF
+declare -A SUPERSEDED_BY
 VERBOSE=0
 [ "${1:-}" = "--verbose" ] && VERBOSE=1
 skipped=""
@@ -51,15 +53,44 @@ for f in "$DEC"/*.md; do
     fail "$name: '## 备选方案' 为空。没有真实备选就写「无备选：<理由>」，不要留白也不要编造"
   fi
 
-  # 已取代必须写明去向，且目标可达
+  # 日期行必须与文件名里的日期一致
+  fn_date="${name%%-*}-$(echo "$name" | cut -d- -f2)-$(echo "$name" | cut -d- -f3)"
+  doc_date="$(sed -n 's/^\*\*日期\*\*：\([0-9-]*\).*/\1/p' "$f" | head -1)"
+  [ -z "$doc_date" ] || [ "$doc_date" = "$fn_date" ] || \
+    fail "$name: 日期行 '$doc_date' 与文件名日期 '$fn_date' 不一致"
+
+  STATUS_OF["$name"]="$st"
+  # 已取代必须写明去向，且目标可达、非自指
   if [ "$st" = "已取代" ]; then
     tgt="$(sed -n 's/.*被 `\([^`]*\)` 取代.*/\1/p' "$f" | head -1)"
     if [ -z "$tgt" ]; then
       fail "$name: 状态为已取代，但正文没有「被 \`<文件名>\` 取代」"
+    elif [ "$tgt" = "$name" ]; then
+      fail "$name: 声称被自己取代"
     elif [ ! -f "$DEC/$tgt" ] && [ ! -f "$DEC/archive/$tgt" ]; then
       fail "$name: 声称被 '$tgt' 取代，但该文件不存在"
+    else
+      SUPERSEDED_BY["$name"]="$tgt"
     fi
   fi
+done
+
+# 取代链：不得成环，终点必须是一条有效的当前记录
+for src in "${!SUPERSEDED_BY[@]}"; do
+  seen=" $src "; cur="$src"; steps=0
+  while [ -n "${SUPERSEDED_BY[$cur]:-}" ]; do
+    nxt="${SUPERSEDED_BY[$cur]}"
+    case "$seen" in *" $nxt "*) fail "$src: 取代关系成环（… -> $cur -> $nxt）"; cur=""; break ;; esac
+    seen="$seen$nxt "; cur="$nxt"; steps=$((steps + 1))
+    [ "$steps" -gt 64 ] && { fail "$src: 取代链过长，疑似成环"; cur=""; break; }
+  done
+  [ -n "$cur" ] || continue
+  end_st="${STATUS_OF[$cur]:-}"
+  case "$end_st" in
+    现行|已归档) ;;
+    "") fail "$src: 取代链终点 '$cur' 不在本目录（可能已归档到 archive/，请核对）" ;;
+    *)  fail "$src: 取代链终点 '$cur' 状态是 '$end_st'，应落到「现行」或「已归档」" ;;
+  esac
 done
 
 if [ "$n" -eq 0 ]; then

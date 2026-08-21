@@ -2,15 +2,15 @@
 
 **状态**：现行
 **日期**：2026-08-21
-**触发**：sim 会话在 SIM-001a 终审后立了三条纪律（第三类测试失败、无出处数值常量、合同盲区），全部普适，但只写进 `~/sim/CODEX.md` 与 `~/sim/CLAUDE.md`。核对框架侧：`DS-common.md`、`~/.claude/collab-framework/DS-common.md`、`CODEX-template.md` **三份都不含**「反例证伪 / 声称的性质 / 第三类」任一字样。
-**作用面**：`collab-framework/DS-common.md` §6 §7、`collab-framework/CODEX-template.md` §审查重点；`USAGE.md` 的收尾流程。
+**触发**：sim 会话在 SIM-001a 终审后立了三条纪律（第三类测试失败、无出处数值常量、合同盲区），全部普适，但只写进 `~/sim/CODEX.md` 与 `~/sim/CLAUDE.md`。核对框架侧：`DS-common.md`、`~/.claude/collab-framework/DS-common.md`、`REVIEWER-template.md` **三份都不含**「反例证伪 / 声称的性质 / 第三类」任一字样。
+**作用面**：`collab-framework/DS-common.md` §6 §7、`collab-framework/REVIEWER-template.md` §审查重点；`USAGE.md` 的收尾流程。
 **证据**：`~/sim/tasks/SIM-001a-spec-ir-determinism.md` §8.1（三条发现的逐条归因：哪条与 skill 相关、哪条是任务书缺陷、哪条是分类夹缝）、§8.3（对本仓 skill 池现状的评估）、§8.4 与 §9（sim 侧编号 C1–C5 及其状态）。**本仓不复制其内容，以该文件为准。**
 
 ## 决定
 
 项目层新立一条纪律时，**当轮判定它是通用还是项目特有**：
 
-- **通用** → 同一轮回流到 `collab-framework/DS-common.md` 或 `CODEX-template.md`，并同步部署到 `~/.claude/collab-framework/`。不回流，该项整改**不算完成**
+- **通用** → 同一轮回流到 `collab-framework/DS-common.md` 或 `REVIEWER-template.md`，并同步部署到 `~/.claude/collab-framework/`。不回流，该项整改**不算完成**
 - **项目特有** → 留在项目文件，并在该条旁写明「为什么只对本项目成立」
 
 判据：**换一个项目，这条还成立吗？** 成立即通用。
@@ -19,7 +19,7 @@
 
 不回流的后果是确定的：**下一个新项目从模板初始化，会重新拿到没有这条纪律的文件**，然后重新踩一遍同一个坑。
 
-更值得记的是这次的具体形态。`CODEX-template.md §审查重点` 里**本来就有**对应的一行——
+更值得记的是这次的具体形态。`REVIEWER-template.md §审查重点` 里**本来就有**对应的一行——
 
 > 测试质量 | 测试能否区分"正确实现"和"凑巧通过"？
 
@@ -35,7 +35,7 @@
 
 ## 验收证据
 
-回流已执行：`DS-common.md` 新增「第三类：测试通过但不约束它声称的性质」及反例证伪法与触发清单；`CODEX-template.md §审查重点` 把抽象的「测试质量」一行替换为三类失败表 + 反例证伪法 + 数值常量三分（参数 / 门限系数 / 可内嵌例外）+ 合同盲区。`~/.claude/collab-framework/DS-common.md` 已同步。
+回流已执行：`DS-common.md` 新增「第三类：测试通过但不约束它声称的性质」及反例证伪法与触发清单；`REVIEWER-template.md §审查重点` 把抽象的「测试质量」一行替换为三类失败表 + 反例证伪法 + 数值常量三分（参数 / 门限系数 / 可内嵌例外）+ 合同盲区。`~/.claude/collab-framework/DS-common.md` 已同步。
 
 核对方式：改动后重跑同一条 grep，三份框架文件从 0 命中变为命中。
 
