@@ -6,7 +6,8 @@ description: Use when the decision-record corpus needs pruning or a new record s
 # 决策记录退役
 
 **状态**：stub
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh `dsh-archive-agent-notes`
 **触发条件**：决策语料达到需要清理的规模，或新记录取代旧记录
 **核心判断**：这条记录还在阻止一个**诱人错误**吗？

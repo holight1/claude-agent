@@ -330,6 +330,7 @@ AI：DeepSeek（理由一句话）
 | `collab-framework/DS-common.md` | `~/.claude/collab-framework/DS-common.md` |
 | `memory-template/` | 仅新机器初始化时用，已有 memory 不覆盖 |
 | `skills/` 或 `enabled/` | 跑 `scripts/sync-skills.sh` |
+| 共享 skill 的 `## 跨角色必读` | 跑 `scripts/render-shared.py`，再把 `DS-common.md` 部署到 `~/.claude/collab-framework/` |
 | 任何框架文件 | 跑 `scripts/check-framework.sh`，并当轮 commit（不 push） |
 
 **改框架前后都跑 `scripts/check-framework.sh`。** 它校验 skill、校验决策记录、并守卫工作树——本仓被多个架构师会话共写，未提交状态会被下一个会话误扫进自己的提交或误删。
@@ -354,3 +355,4 @@ AI：DeepSeek（理由一句话）
 | Skill 投影脚本 | `~/claude-agent/scripts/sync-skills.sh` |
 | 框架总门禁 | `~/claude-agent/scripts/check-framework.sh` |
 | 框架决策记录 | `~/claude-agent/decisions/` |
+| 共享块渲染 | `~/claude-agent/scripts/render-shared.py` |

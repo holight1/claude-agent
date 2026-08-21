@@ -6,7 +6,8 @@ description: Use when writing or substantially revising a task file and its acce
 # 任务合同设计
 
 **状态**：enabled
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：本框架任务设计实践 + dsh「门禁需要自己的负测试」原则
 **核心判断**：这条验收条件，作弊是不是比做对更难？
 

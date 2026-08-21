@@ -6,7 +6,8 @@ description: Use when initializing a newly managed repository — identifies aut
 # 新项目摸底建图
 
 **状态**：stub
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh 的仓库自述结构 + 本框架 DSH-001a 调研任务
 **触发条件**：新项目纳管时；平时休眠
 **核心判断**：这个仓的权威源在哪、写入边界在哪？

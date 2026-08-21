@@ -6,7 +6,8 @@ description: Use whenever a task exposes a defect in the collaboration process i
 # 流程缺口捕获
 
 **状态**：enabled
-**消费者**：架构师（各项目会话）
+**消费者**：架构师
+**投影**：无
 **来源**：sim 工作区 2026-08-21 的实践，见 `~/sim/code-agent/process-notes/0001-no-channel-for-process-gaps.md`
 **核心判断**：这次的问题**只是这次做错了**，还是**流程允许它发生**？
 

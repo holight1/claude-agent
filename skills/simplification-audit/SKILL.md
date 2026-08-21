@@ -6,7 +6,8 @@ description: Use only when explicitly asked to find simplification or removal ca
 # 简化候选审计
 
 **状态**：stub
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh `dsh-find-simplifications`
 **触发条件**：**用户明确要求**简化、瘦身或寻找候选（不自动触发）
 **核心判断**：删掉它之后，谁会在什么场景下重新把它加回来？

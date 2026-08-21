@@ -6,7 +6,8 @@ description: Use when a documentation set expands, moves, exceeds its budget, or
 # 文档体系架构
 
 **状态**：dormant
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh `dsh-doc-standards`；本框架 2026-08-21 的两处实测漂移
 **核心判断**：这条事实的**归属地**是哪一篇？
 

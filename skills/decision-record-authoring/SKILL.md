@@ -6,7 +6,8 @@ description: Use when a change touches behavior, architecture, cross-file conven
 # 决策记录写入
 
 **状态**：enabled
-**消费者**：架构师（CC）+ 执行端（通过 `DS-common.md` 引用）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh `.agents/notes/` 制度；本框架 `decisions/` 于 2026-08-21 建立
 **核心判断**：将来有人想把这个决定改回去时，他需要的信息现在在不在？
 

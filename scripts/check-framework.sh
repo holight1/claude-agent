@@ -30,6 +30,14 @@ echo
 bash "$ROOT/scripts/check-decisions.sh" || rc=1
 echo
 
+echo "== 共享块投影 =="
+if [ "$MODE" = "check" ]; then
+  python3 "$ROOT/scripts/render-shared.py" --check || rc=1
+else
+  python3 "$ROOT/scripts/render-shared.py" || rc=1
+fi
+echo
+
 echo "== 工作树 =="
 dirty="$(git -C "$ROOT" status --short 2>/dev/null)"
 if [ -z "$dirty" ]; then

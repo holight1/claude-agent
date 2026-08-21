@@ -6,7 +6,8 @@ description: Use when writing or reviewing persistent prose — Markdown, doc co
 # 持久散文审查
 
 **状态**：dormant
-**消费者**：架构师（CC）+ 执行端
+**消费者**：架构师
+**投影**：无
 **来源**：dsh `dsh-prose-standard` + `dsh-trim-cot-leakage`（初期合并）
 **核心判断**：只读 HEAD 的读者，能不能独立解析并核验这句话？
 

@@ -50,6 +50,31 @@ for d in "$SRC"/*/; do
   fi
   STATUS_OF["$name"]="$st"
 
+  # 消费者 / 投影：闭集，dropped 免除
+  if [ "$st" != "dropped" ]; then
+    cons="$(sed -n 's/^\*\*消费者\*\*：\(.*\)$/\1/p' "$f" | head -1)"
+    proj="$(sed -n 's/^\*\*投影\*\*：\(.*\)$/\1/p' "$f" | head -1)"
+    case "$cons" in
+      架构师|共享) ;;
+      "") fail "$name: 缺 '**消费者**：架构师|共享' 行" ;;
+      *)  fail "$name: 消费者 '$cons' 不在闭集 [架构师 共享] 内" ;;
+    esac
+    [ -n "$proj" ] || fail "$name: 缺 '**投影**：无|<目标文件>' 行"
+    if [ "$cons" = "共享" ]; then
+      [ "$proj" = "无" ] && fail "$name: 消费者为共享，投影不得为「无」"
+      if grep -q '^## 跨角色必读' "$f"; then
+        # 跨角色必读要短：它进的是执行端每轮必读的文件
+        n_cross="$(sed -n '/^## 跨角色必读/,/^---$/p' "$f" | wc -l)"
+        [ "$n_cross" -le 45 ] || fail "$name: §跨角色必读 $n_cross 行，超过 45 行上限（它进执行端每轮必读的文件，只放真正跨角色的那部分）"
+      else
+        fail "$name: 消费者为共享，但缺 '## 跨角色必读' 一节"
+      fi
+    else
+      [ "$proj" = "无" ] || fail "$name: 消费者为架构师，投影应为「无」（当前 '$proj'）"
+      grep -q '^## 跨角色必读' "$f" && fail "$name: 消费者为架构师，不该有 '## 跨角色必读'"
+    fi
+  fi
+
   # enabled 必须有 evals/EVALS.md，且「判据：§…」指向 SKILL.md 里真实存在的小节
   if [ "$st" = "enabled" ]; then
     ev="$d/evals/EVALS.md"

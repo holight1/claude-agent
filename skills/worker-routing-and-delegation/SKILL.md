@@ -6,7 +6,8 @@ description: Use when choosing between executor, subagent, and independent revie
 # Worker 路由与委托
 
 **状态**：enabled
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh 的委托边界 + DSH-003a（策略继承 / 管理者所有权 / 失败事实）+ 本框架实测修正
 **核心判断**：这件事的结果，架构师能不能独立机械核对？
 

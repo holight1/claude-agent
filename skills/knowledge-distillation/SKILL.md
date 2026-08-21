@@ -6,7 +6,8 @@ description: Use only when explicitly asked to distill source material into the 
 # 知识蒸馏入图
 
 **状态**：stub
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：本框架 DSH-002a / 003a 抽取实践 + `~/knowledge-graph` 的既有纪律
 **触发条件**：**用户明确要求**从材料进入知识图谱（不自动触发）
 **核心判断**：这条是二层方法学，还是这个项目的一层事实？

@@ -158,6 +158,8 @@ AI：DeepSeek
     check-framework.sh             # 总门禁：skill + 决策记录 + 工作树守卫
     sync-skills.sh                 # skill 校验与三客户端投影
     check-decisions.sh             # 决策记录校验
+    render-shared.py               # 把共享 skill 的 §跨角色必读 渲染进模板标记块
+    _opencode_skills_path.py       # 解析 JSONC 核对 opencode 的 skills.paths
   memory-template/
     MEMORY.md                      # 全局记忆初始模板
     gpt-registry-template.md       # DS 实例注册表模板
@@ -176,6 +178,7 @@ AI：DeepSeek
 | 通用执行端规则 | `collab-framework/DS-common.md` | 改完必须同步到 `~/.claude/collab-framework/` |
 | 独立 reviewer 的通用检查 | `collab-framework/REVIEWER-template.md` | 项目 `REVIEWER.md` 从它初始化 |
 | 判断程序（需要判断，不是固定步骤） | `skills/<name>/SKILL.md` | 不得写具体项目命令 |
+| **执行端 / reviewer 也要用的那部分判断程序** | 仍是 `skills/<name>/SKILL.md` §跨角色必读 | 由 `scripts/render-shared.py` 渲染进 `DS-common.md` / `REVIEWER-template.md` 的标记块。**标记块内不可手改** |
 | 某条 skill 是否启用 | `enabled/` 里有没有链接 | 不看 frontmatter |
 | **改框架的理由** | `decisions/` | 项目任务文件只留指针 |
 | 变更轨迹 | `git log` | 不设追加式变更日志 |
@@ -191,6 +194,8 @@ AI：DeepSeek
 scripts/check-framework.sh --check    # 只校验
 scripts/check-framework.sh            # 校验 + 投影 skill 到三个客户端
 ```
+
+**skill 机制只对架构师侧有效。** opencode 日志实测 `permission=skill` 为 0——执行端与独立 reviewer 从不主动调用 skill，它们唯一可靠的载体是每轮必读的文件（`DS-common.md` / `DS.md` / `REVIEWER.md`）。所以 skill 分 `架构师` 与 `共享` 两类，后者的 `## 跨角色必读` 必须投影进那些文件，且**投影是生成的、不是手抄的**。
 
 **框架仓由多个架构师会话共写**（各自坐在不同项目根上），所以工作树不留未提交状态——改完当轮 commit（不 push），message 首行标明来源工作区。理由见 `decisions/2026-08-21-framework-repo-shared-by-sessions.md`。
 

@@ -6,7 +6,8 @@ description: Use when a change to a graphical interface needs visual proof — r
 # 界面可视证据
 
 **状态**：stub
-**消费者**：架构师（CC）
+**消费者**：架构师
+**投影**：无
 **来源**：dsh `record-browser-gif`
 **启用前提**：项目有 GUI，且变更需要可视证据
 **核心判断**：截图里那个界面，是不是真实交付链路跑出来的？
