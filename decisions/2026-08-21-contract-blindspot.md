@@ -2,7 +2,8 @@
 
 **状态**：现行
 **日期**：2026-08-21
-**触发**：sim SIM-001a 中，一个硬编码默认值逃过了防魔数检查，原因是任务书的验收清单用「…」省略号写得不全。实现、测试、独立审查三方**一起对着残缺规格「全部正确」**。
+**触发**：sim SIM-001a 终审的 R1——一个硬编码默认值逃过了防魔数检查，成因是任务书验收表的常量清单用「…」省略号写得不完整。实现、测试、独立审查三方**一起对着残缺规格「全部正确」**。
+**证据**：`~/sim/tasks/SIM-001a-spec-ir-determinism.md` §架构师终审 §2（R1–R3 三条整改的原文与判据）、§8.1（逐条归因表）。整改落点见 `~/sim/tasks/SIM-001b-engine-resources-report.md` §A。**本仓不复制其内容，以该文件为准。**
 **作用面**：`skills/task-acceptance-replay/SKILL.md`、`skills/task-contract-design/SKILL.md`、`collab-framework/CODEX-template.md`。
 
 ## 决定
@@ -19,7 +20,7 @@
 
 这一条同时是对本仓 skill 设计的**反证**。`task-contract-design` 与 `task-acceptance-replay` 被设计成互为负测试——验收发现的漏洞，回头应能指出任务设计里哪条没写死。但这个闭环的前提是「任务书是对的」。任务书本身有洞时，两个 skill 一起失效。
 
-第 3 条有两处独立证据，来自互不相干的项目：sim 的 `MAGIC_NUMBERS` 手工清单因省略号不全而漏检；`~/agent` 侧 `practice-agent/code-agent/knowledge/README.md` 的主题表漏登记了 `02-endpoint-facts.md`——**6 个文件、1 个人，索引就已经漂了**。
+第 3 条有两处独立证据，来自互不相干的项目：sim 的 `MAGIC_NUMBERS` 手工清单因省略号不全而漏检；`~/agent` 侧 `~/agent/agent-assets/practice-agent/code-agent/knowledge/README.md` 的主题表漏登记了 `02-endpoint-facts.md`——**6 个文件、1 个人，索引就已经漂了**。
 
 顺带修正一条来自 dsh 的判据：dsh 反对中心 INDEX，理由是**合并热点**。本框架只有一个用户，那个理由不成立，但索引照样漂了。⇒ 正确结论不是「不设 INDEX」，而是**手工维护的中心清单在任何规模下都会漂，只是 dsh 先在合并冲突上撞到**。
 

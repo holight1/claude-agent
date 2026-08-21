@@ -36,3 +36,5 @@
 路径解析已实证：`~/.claude/skills -> enabled -> ../skills/<name>` 两跳可读；Codex 侧逐个链接就位；opencode 配置为绝对路径 `/home/suiyan/claude-agent/enabled`。
 
 **未验证**：DS 会话内 skill 是否真被加载并触发（端到端）。这一环至今没有证据。
+
+**已知矛盾（未决）**：`semantic-code-review` 自述消费者是「读各仓 `CODEX.md` 的独立 reviewer」，而 `CODEX-template.md §禁止事项` 写着「收到『请先读取 CODEX.md』时，只读 `CODEX.md`，不读其他 MD 文件」。照模板初始化的新项目里，该 skill **按设计不可达**。sim 的实际做法是把 skill 正文抄进项目 `CODEX.md`，于是同一段判据有了两份手工同步的副本。两条必须改一条，尚未决定改哪条。

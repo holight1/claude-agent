@@ -3,7 +3,8 @@
 **状态**：现行
 **日期**：2026-08-21
 **触发**：sim 会话在 SIM-001a 终审后立了三条纪律（第三类测试失败、无出处数值常量、合同盲区），全部普适，但只写进 `~/sim/CODEX.md` 与 `~/sim/CLAUDE.md`。核对框架侧：`DS-common.md`、`~/.claude/collab-framework/DS-common.md`、`CODEX-template.md` **三份都不含**「反例证伪 / 声称的性质 / 第三类」任一字样。
-**作用面**：`collab-framework/DS-common.md`、`collab-framework/CODEX-template.md`；`USAGE.md` 的收尾流程。
+**作用面**：`collab-framework/DS-common.md` §6 §7、`collab-framework/CODEX-template.md` §审查重点；`USAGE.md` 的收尾流程。
+**证据**：`~/sim/tasks/SIM-001a-spec-ir-determinism.md` §8.1（三条发现的逐条归因：哪条与 skill 相关、哪条是任务书缺陷、哪条是分类夹缝）、§8.3（对本仓 skill 池现状的评估）、§8.4 与 §9（sim 侧编号 C1–C5 及其状态）。**本仓不复制其内容，以该文件为准。**
 
 ## 决定
 
@@ -37,3 +38,7 @@
 回流已执行：`DS-common.md` 新增「第三类：测试通过但不约束它声称的性质」及反例证伪法与触发清单；`CODEX-template.md §审查重点` 把抽象的「测试质量」一行替换为三类失败表 + 反例证伪法 + 数值常量三分（参数 / 门限系数 / 可内嵌例外）+ 合同盲区。`~/.claude/collab-framework/DS-common.md` 已同步。
 
 核对方式：改动后重跑同一条 grep，三份框架文件从 0 命中变为命中。
+
+**效果证据（前后对照）**：`~/sim/code-agent/process-notes/0002-review-checklist-missing-third-failure-class.md` 末尾记载——清单加上第三类检查后，下一轮任务的独立 reviewer 当轮即主动执行反例证伪三次，抓到 4 条执行端未自查的问题；审查侧从上一轮的「三条全漏」到这一轮的「四条自抓」，只隔了一次清单修订。
+
+这是本框架目前**唯一一条带前后对照的制度有效性证据**。其余制度都只能证明「如此设计」，不能证明「有效」——按 `research-evidence-audit` 的判据，没有反事实或运行证据时不得宣称有效。

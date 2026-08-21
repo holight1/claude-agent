@@ -78,3 +78,5 @@ git commit -m "<task-id>: 描述"
 ```
 
 不自动 push，push 须用户确认。
+
+> 执行端 commit 边界的来由（含被放弃的三个替代方案）：`~/claude-agent/decisions/2026-08-21-executor-commit-boundary.md`

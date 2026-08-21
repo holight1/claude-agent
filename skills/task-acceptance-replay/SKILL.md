@@ -114,6 +114,8 @@ description: Use when an executor returns a task and you are about to mark it pa
 
 实证：某次终审的三条发现全部来自这一步——手算块量化、反例证伪 RNG 测试、回查一个门限常数的出处。同一批产出被执行端自审和独立 reviewer 都判过「通过」，因为**三方对着同一份残缺规格，各自都是正确的**。
 
+> §5 与 §6 的来由与原始证据：`~/claude-agent/decisions/2026-08-21-contract-blindspot.md`
+
 ## 停止条件
 
 - 任一步拿不到证据 → **停**，在报告里写进「我无法自我验证」，不要用推断补
@@ -137,4 +139,15 @@ description: Use when an executor returns a task and you are about to mark it pa
 
 - 代码语义缺陷 → `semantic-code-review`
 - 引文、计数与事实核对 → `research-evidence-audit`
-- 任务当初该怎么写 → `task-contract-design`（验收发现的每个漏洞，回头都应能指出任务设计里哪条没写死）
+- 任务当初该怎么写 → `task-contract-design`
+
+## 终审必做的最后一步
+
+**本轮的每个发现，能指回任务设计的哪一条？**
+
+- 指得出 → 记下来，那条判据下次要写死
+- **指不出来 → 判据表本身缺项**，按 `process-gap-capture` 落一条 process-note，别只在口头指出
+
+这一步不是可选的收尾。流程缺口写在任务终审区就会散落在几百行任务文件里，采纳时要翻任务，而且**机制依赖有人记得提醒**。
+
+> 本节的来由与原始证据：`~/claude-agent/decisions/2026-08-21-adopt-sim-process-notes.md`

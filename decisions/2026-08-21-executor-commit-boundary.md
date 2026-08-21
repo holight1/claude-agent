@@ -32,4 +32,4 @@ commit 是 **review 的边界**。没有它，架构师在工作树里看到的�
 
 ## 验收证据
 
-`review-task.md §5` 分成两路：执行端已 commit 时先核对箱内清单与完成区是否一致、箱外有无残留，不一致直接打回而不是替它补 commit。`practice-agent/DS.md` 与 `deepseek-harness/DS.md` 各自给出了相反的项目级策略，证明覆盖机制可用。
+`review-task.md §5` 分成两路：执行端已 commit 时先核对箱内清单与完成区是否一致、箱外有无残留，不一致直接打回而不是替它补 commit。`~/agent/agent-assets/practice-agent/DS.md` 与 `~/agent/agent-assets/deepseek-harness/DS.md` 各自给出了相反的项目级策略，证明覆盖机制可用。

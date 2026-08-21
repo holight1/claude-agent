@@ -100,6 +100,8 @@ CC（任务设计）→ DS（实现）→ Codex（审查）→ CC（双重确认
 
 **以任务书为唯一判据的审查，原理上抓不到任务书本身的缺陷。** 每次审查**至少留一部分不依赖任务书**：挑 2–3 个关键数值或算法自己独立算一遍，与实现输出对照——不是"对着验收表打勾"。
 
+> 上面三节的来由与原始证据：`~/claude-agent/decisions/2026-08-21-contract-blindspot.md`、`~/claude-agent/decisions/2026-08-21-project-to-framework-backflow.md`
+
 **断言降级是最高优先级阻断**。DS 常见的降级手段：
 - `EXPECT_GT(hits, 0)` → `fprintf(stderr, ...)`（软化为打印）
 - `EXPECT_LE(mismatch, 2)` → `EXPECT_LE(mismatch, 32)`（放宽阈值）

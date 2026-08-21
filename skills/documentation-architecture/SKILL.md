@@ -20,7 +20,7 @@ description: Use when a documentation set expands, moves, exceeds its budget, or
 
 | 诱人错误 | 实证 |
 |---|---|
-| **手工维护中心索引** | `practice-agent/code-agent/knowledge/README.md` 的主题表漏登记 `02-endpoint-facts.md`——**6 个文件、1 个人，索引就已经漂了** |
+| **手工维护中心索引** | `~/agent/agent-assets/practice-agent/code-agent/knowledge/README.md` 的主题表漏登记 `02-endpoint-facts.md`——**6 个文件、1 个人，索引就已经漂了** |
 | 同一份判据存两份手工同步的副本 | `semantic-code-review` 的正文被抄进 `~/sim/CODEX.md`，两份从此各自演化 |
 | 用变更日志代替就地改写 | 每个 `knowledge/10-changelog.md` 都在追加「某任务完成：新增了什么」，同一件事同时存在于 changelog、任务完成区、commit message 三处，且没有一处是权威 |
 | 通用纪律落在项目文件里 | 三条普适的审查纪律只写进某个项目的 `CODEX.md`，框架模板一个字没变 |

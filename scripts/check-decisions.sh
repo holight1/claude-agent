@@ -13,6 +13,9 @@ SECTIONS="## 决定|## 为什么|## 备选方案|## 验收证据"
 
 errors=0
 fail() { printf '  [FAIL] %s\n' "$1"; errors=$((errors + 1)); }
+VERBOSE=0
+[ "${1:-}" = "--verbose" ] && VERBOSE=1
+skipped=""
 
 echo "== 校验决策记录 $DEC =="
 n=0
@@ -72,5 +75,45 @@ for s in $STATUSES; do
   c="$(grep -l "^\*\*状态\*\*：$s" "$DEC"/*.md 2>/dev/null | grep -v '/README\.md$' | wc -l)"
   printf '    %-6s %d\n' "$s" "$c"
 done
+
+# ---------- 证据链：被引用的路径必须可达 ----------
+# 仓内引用断了 = 硬失败（我们控制得了）；仓外引用断了 = 警告（别的仓可能改名或删除）。
+echo "== 证据链可达性 =="
+SCAN=$(ls "$DEC"/*.md "$ROOT"/skills/*/SKILL.md "$ROOT"/skills/README.md \
+         "$ROOT"/collab-framework/*.md "$ROOT"/README.md "$ROOT"/USAGE.md 2>/dev/null)
+n_in=0; n_ext=0; n_skip=0; warn=0
+for f in $SCAN; do
+  while IFS= read -r ref; do
+    [ -n "$ref" ] || continue
+    case "$ref" in *'<'*|*'>'*) n_skip=$((n_skip + 1)); continue ;; esac  # 模板占位符
+    case "$ref" in
+      "~/"*)   n_ext_or_in=1; abs="$HOME/${ref#\~/}" ;;
+      "/"*)    n_ext_or_in=1; abs="$ref" ;;
+      skills/*|decisions/*|scripts/*|collab-framework/*|memory-template/*|enabled/*)
+               abs="$ROOT/$ref" ;;
+      ../*)    abs="$(dirname "$f")/$ref" ;;
+      *)       n_skip=$((n_skip + 1)); skipped="$skipped$ref
+"; continue ;;
+    esac
+    case "$abs" in
+      "$ROOT"/*) n_in=$((n_in + 1))
+                 [ -e "$abs" ] || fail "$(basename "$f") 引用了不存在的仓内路径：$ref" ;;
+      *)         n_ext=$((n_ext + 1))
+                 if [ ! -e "$abs" ]; then
+                   printf '  [WARN] %s 引用的仓外路径不可达：%s\n' "$(basename "$f")" "$ref"
+                   warn=$((warn + 1))
+                 fi ;;
+    esac
+  done <<< "$(grep -oE '`[^`]+`' "$f" | tr -d '`' | grep -E '(/|^~)' | grep -E '\.(md|sh|py|yaml|yml|json|jsonc)$|/$')"
+done
+echo "  核了 $n_in 条仓内引用、$n_ext 条仓外引用；跳过 $n_skip 个（模板占位符或非路径 token）；$warn 条仓外不可达"
+# 本检查自身也是「规则 + 作用集合」。集合缩小是最容易发生且最不可见的失效，
+# 所以跳过项必须可被列出抽查，不能只报数量。判据见
+# decisions/2026-08-21-adopt-sim-process-notes.md（采纳 sim process-note 0004）。
+if [ "$VERBOSE" -eq 1 ] && [ -n "$skipped" ]; then
+  echo "  被跳过的 token（--verbose）："
+  printf '%s' "$skipped" | sort -u | sed 's/^/    /'
+fi
+
 echo "== 结果：$n 条记录 / $errors 处错误 =="
 [ "$errors" -eq 0 ] || exit 1
