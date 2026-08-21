@@ -39,7 +39,6 @@ for f in "$DEC"/*.md; do
     fail "$name: 状态 '$st' 不在闭集 [$STATUSES] 内"
   fi
 
-  grep -q '^\*\*日期\*\*：' "$f" || fail "$name: 缺 '**日期**：' 行"
   grep -q '^\*\*触发\*\*：' "$f" || fail "$name: 缺 '**触发**：' 行"
   grep -q '^\*\*作用面\*\*：' "$f" || fail "$name: 缺 '**作用面**：' 行"
 
@@ -55,9 +54,14 @@ for f in "$DEC"/*.md; do
 
   # 日期行必须与文件名里的日期一致
   fn_date="${name%%-*}-$(echo "$name" | cut -d- -f2)-$(echo "$name" | cut -d- -f3)"
-  doc_date="$(sed -n 's/^\*\*日期\*\*：\([0-9-]*\).*/\1/p' "$f" | head -1)"
-  [ -z "$doc_date" ] || [ "$doc_date" = "$fn_date" ] || \
+  doc_date="$(sed -n 's/^\*\*日期\*\*：[[:space:]]*\(.*\)$/\1/p' "$f" | head -1 | sed 's/[[:space:]]*$//')"
+  if [ -z "$doc_date" ]; then
+    fail "$name: 缺 '**日期**：' 行或其值为空"
+  elif ! printf '%s' "$doc_date" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+    fail "$name: 日期 '$doc_date' 不是 YYYY-MM-DD"
+  elif [ "$doc_date" != "$fn_date" ]; then
     fail "$name: 日期行 '$doc_date' 与文件名日期 '$fn_date' 不一致"
+  fi
 
   STATUS_OF["$name"]="$st"
   # 已取代必须写明去向，且目标可达、非自指
@@ -73,6 +77,14 @@ for f in "$DEC"/*.md; do
       SUPERSEDED_BY["$name"]="$tgt"
     fi
   fi
+done
+
+# 归档记录也要进状态表：它们是取代链的合法终点（见 decisions/README.md §归档）
+for f in "$DEC"/archive/*.md; do
+  [ -f "$f" ] || continue
+  a_name="$(basename "$f")"
+  [ "$a_name" = "README.md" ] && continue
+  STATUS_OF["$a_name"]="已归档"
 done
 
 # 取代链：不得成环，终点必须是一条有效的当前记录

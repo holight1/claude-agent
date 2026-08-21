@@ -12,7 +12,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC="$ROOT/skills"
 ENABLED="$ROOT/enabled"
 CHECK_ONLY=0
-[ "${1:-}" = "--check" ] && CHECK_ONLY=1
+case "${1:-}" in
+  "")       ;;
+  --check)  CHECK_ONLY=1 ;;
+  *) echo "用法：$(basename "$0") [--check]" >&2
+     echo "未知参数：$1（参数是闭集，不静默落进写模式）" >&2
+     exit 2 ;;
+esac
 
 CLAUDE_DIR="$HOME/.claude/skills"
 CODEX_DIR="$HOME/.codex/skills"
@@ -84,8 +90,23 @@ for d in "$SRC"/*/; do
       for sec in 正触发 负触发 诱人错误; do
         grep -q "^## $sec" "$ev" || fail "$name: EVALS.md 缺 '## $sec' 小节"
       done
-      n_temp="$(grep -c '判据：§' "$ev")"
-      [ "$n_temp" -ge 1 ] || fail "$name: EVALS.md 没有任何带「判据：§」的诱人错误条目"
+      # 正/负触发至少各一条数据行（表头与分隔行不算）
+      for sec in 正触发 负触发; do
+        n_row="$(sed -n "/^## $sec/,/^## /p" "$ev" | grep -c '^|' || true)"
+        [ "$n_row" -ge 3 ] || fail "$name: EVALS.md §$sec 没有数据行（当前 $n_row 行表格，需表头+分隔+至少一条）"
+      done
+      # 诱人错误：每条数据行都必须绑定判据
+      n_row=0; n_bad=0
+      while IFS= read -r row; do
+        case "$row" in
+          '|---'*|'| ---'*|'|--'*) continue ;;
+          '| 场景 '*|'|场景'*) continue ;;
+        esac
+        n_row=$((n_row + 1))
+        case "$row" in *'判据：§'*) ;; *) n_bad=$((n_bad + 1)) ;; esac
+      done <<< "$(sed -n '/^## 诱人错误/,/^## /p' "$ev" | grep '^|')"
+      [ "$n_row" -ge 1 ] || fail "$name: EVALS.md §诱人错误 没有数据行"
+      [ "$n_bad" -eq 0 ] || fail "$name: EVALS.md §诱人错误 有 $n_bad/$n_row 条缺「判据：§」——决策要求每条都绑定"
       while IFS= read -r frag; do
         [ -n "$frag" ] || continue
         grep -qE "^#{1,4} .*$(printf '%s' "$frag" | sed 's/[][\.*^$/]/\\&/g')" "$f" || \

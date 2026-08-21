@@ -17,6 +17,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILLS = os.path.join(ROOT, 'skills')
+ENABLED = os.path.join(ROOT, 'enabled')
 TARGET_DIR = os.path.join(ROOT, 'collab-framework')
 SECTION = '## 跨角色必读'
 BEGIN = '<!-- BEGIN SKILL-BLOCK: {} -->'
@@ -51,12 +52,31 @@ def main() -> int:
         m = re.search(r'^\*\*投影\*\*：(.+)$', text, re.M)
         if not m or m.group(1).strip() == '无':
             continue
+        # 休眠或移出启用池的 skill 不得继续投影——否则它对执行端仍然生效
+        st = re.search(r'^\*\*状态\*\*：(\S+)', text, re.M)
+        st = st.group(1) if st else ''
+        if st != 'enabled' or not os.path.islink(os.path.join(ENABLED, name)):
+            errors.append(f'{name}: 声明了投影目标，但状态为「{st or "缺失"}」'
+                          f'{"、且不在启用池" if not os.path.islink(os.path.join(ENABLED, name)) else ""}。'
+                          f'请先删除目标文件里它的标记块，再改状态')
+            continue
         body = extract(sp)
         if not body:
             errors.append(f'{name}: 声明了投影目标但没有 `{SECTION}` 一节')
             continue
         for tgt in [t.strip() for t in m.group(1).split(',')]:
             plan.setdefault(tgt, {})[name] = body
+
+    # 孤儿标记块：目标文件里有块，但没有对应的、当前生效的共享 skill
+    for tgt in sorted(os.listdir(TARGET_DIR)):
+        path = os.path.join(TARGET_DIR, tgt)
+        if not os.path.isfile(path) or not tgt.endswith('.md'):
+            continue
+        text = io.open(path, encoding='utf-8').read()
+        for found in re.findall(r'<!-- BEGIN SKILL-BLOCK: ([^>]+?) -->', text):
+            if found not in plan.get(tgt, {}):
+                errors.append(f'{tgt}: 孤儿标记块 {found} —— 该 skill 已不是生效的共享 skill，'
+                              f'请删除这对标记及其内容')
 
     n_blocks = 0
     for tgt, blocks in sorted(plan.items()):
