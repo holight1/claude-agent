@@ -81,37 +81,43 @@ for d in "$SRC"/*/; do
     fi
   fi
 
-  # ---------- 具体案例不得进 SKILL.md 正文 ----------
-  # 🔴 判别式（不是词黑名单）：**skill 正文里的数字只能是判据的参数，不得是无出处的实测值。**
-  # 实测值有两个机械可判的特征：科学计数法，以及四位及以上的裸数字字面量。
-  # 框架级判据的参数（行数上限、第几次、闭集大小）都是小整数，不需要这两种形态。
-  #
-  # 分档按**上下文成本**，不按喜好：
-  #   - `## 跨角色必读` 零容忍 —— 它投影进每个项目执行端**每轮必读**的文件；
-  #   - 正文其余部分：科学计数法一律禁；四位以上数字**只允许出现在带出处的行上**
-  #     （行内含 `decisions/`、`process-note`、`~/` 或 `.md`）。引用编号不是实测值，
-  #     而无出处的实测值就是本条要挡的东西。
-  #
-  # 为什么必须挡：skill 是**用户级**载体，每个仓都加载。某个受管项目的实测值写在这里
-  # = 别的仓永久付出上下文成本 + 命中「跨仓错位」这一类诱人错误。
-  # 对照 dsh：它的 skill 在 `.agents/skills/`（**项目级**），永远不会在别的仓被读到，
-  # 所以写满本仓命令与阈值是对的；而它三个 skill 里的事故叙事是 **0 处**，
-  # 事故证据全在 Agent Notes 的 `## Problem`。
+  # ---------- 结构门禁：只查可机械证明的东西 ----------
+  # 🔴 **「正文有没有案例」不可机械判定，本脚本不声称能判。** 语义边界由 review 判断。
+  # 曾经试过用数字正则冒充案例门禁，外部 review 当场给出三条绕过（大写 `1E12`、
+  # 「实测值 8192，见 decisions/…」、不含数字的事故叙事），并指出它会误伤协议常量
+  # 与版本号。那是同一个病的第三个位置（前两个在引用可达性门禁）——按
+  # gate-design-and-negative-testing §3「第三次换位置即设计债」，**停止扩大正则**，
+  # 只保留能证明的结构约束：
+  #   1. `## 判据来源` 存在且**本节内**有可解析的 decisions/ 引用
+  #   2. `## 跨角色必读` 行数预算
+  #   3. `## 跨角色必读` 内零实测值形态、零受管项目路径（该节投影进每任务必读文件，
+  #      预算近乎绝对，所以这一处仍是硬失败）
+  #   4. 可选 `## 校准例` 的条数与长度上限
+  #   5. 生成块一致性（在 render-shared.py）
   # 详见 decisions/2026-08-21-skill-carries-criteria-not-cases.md
-  if [ "$st" != "dropped" ]; then
-    sci="$(grep -nE '[0-9]\.?[0-9]*e[+-]?[0-9]+' "$f" | head -3 | cut -c1-60 | tr '\n' ' ' || true)"
-    [ -z "$sci" ] || fail "$name: SKILL.md 出现科学计数法（$sci）——实测值的特征，案例数字放 evals/ 或 decisions/，正文只留判据"
+  if [ "$st" != "dropped" ] && grep -q '^## 跨角色必读' "$f"; then
+    cross="$(sed -n '/^## 跨角色必读/,/^---$/p' "$f")"
+    hit="$(printf '%s' "$cross" | grep -niE '[0-9]\.?[0-9]*e[+-]?[0-9]+|(^|[^0-9A-Za-z_.-])[0-9]{4,}([^0-9A-Za-z_%-]|$)' | head -2 | cut -c1-56 | tr '\n' ' ' || true)"
+    [ -z "$hit" ] || fail "$name: §跨角色必读 出现实测值形态的数字（$hit）——该节投影进每个角色每任务必读的文件，零容忍"
+    # 受管项目路径不得进共享投影：执行端读不到框架仓，`~/claude-agent` 之外的
+    # `~/X/` 一律是别的项目，写进来就是跨仓错位。
+    pth="$(printf '%s' "$cross" | grep -oE '~/[A-Za-z0-9._-]+/' | grep -v '^~/claude-agent/$' | sort -u | head -2 | tr '\n' ' ' || true)"
+    [ -z "$pth" ] || fail "$name: §跨角色必读 出现受管项目路径（$pth）——共享投影里不得引用别的仓"
+  fi
 
-    big="$(grep -nE '(^|[^0-9A-Za-z_.-])[0-9]{4,}([^0-9A-Za-z_%-]|$)' "$f" \
-           | grep -vE 'decisions/|process-note|~/|\.md' | head -3 | cut -c1-60 | tr '\n' ' ' || true)"
-    [ -z "$big" ] || fail "$name: SKILL.md 有四位以上数字且该行无出处（$big）——判据的参数是小整数，无出处的大数值多为某仓实测值"
-
-    if grep -q '^## 跨角色必读' "$f"; then
-      cross="$(sed -n '/^## 跨角色必读/,/^---$/p' "$f" \
-               | grep -nE '[0-9]\.?[0-9]*e[+-]?[0-9]+|(^|[^0-9A-Za-z_.-])[0-9]{4,}([^0-9A-Za-z_%-]|$)' \
-               | head -3 | cut -c1-60 | tr '\n' ' ' || true)"
-      [ -z "$cross" ] || fail "$name: §跨角色必读 出现实测值形态的数字（$cross）——该节投影进每个项目每轮必读的文件，零容忍"
-    fi
+  # 可选 `## 校准例`：理解判据所必需的最小例子。有上限才不会退化成案例库。
+  # 上限**逐条**算（≤2 条、每条 ≤3 行非空内容），不是算总行数——总行数上限会让
+  # 「一条写六行」通过，而那已经是叙事不是校准。
+  if [ "$st" != "dropped" ] && grep -q '^## 校准例' "$f"; then
+    calib="$(awk '/^## 校准例/{f=1;next} f&&/^## /{exit} f' "$f")"
+    n_item="$(printf '%s\n' "$calib" | grep -c '^- ' || true)"
+    [ "$n_item" -ge 1 ] || fail "$name: 有 '## 校准例' 一节但没有 '- ' 条目"
+    [ "$n_item" -le 2 ] || fail "$name: §校准例 有 $n_item 条，上限 2（多于两条就不是校准，是案例库）"
+    worst="$(printf '%s\n' "$calib" | awk '
+      /^- /   { if (n > m) m = n; n = 1; next }
+      /[^ \t]/{ if (n) n++ }
+      END     { if (n > m) m = n; print m + 0 }')"
+    [ "$worst" -le 3 ] || fail "$name: §校准例 最长的一条有 $worst 行非空内容，上限 3（超过三行就是叙事，移进 evals/ 或 decisions/）"
   fi
 
   # enabled 必须有 evals/EVALS.md，且「判据：§…」指向 SKILL.md 里真实存在的小节
@@ -120,12 +126,15 @@ for d in "$SRC"/*/; do
     if [ ! -f "$ev" ]; then
       fail "$name: 状态 enabled 但缺 evals/EVALS.md（见 skills/README.md §Eval 约定）"
     else
-      # 判据来源：正文不留实证，那实证必须有个家。这条是「案例外置」的另一半——
+      # 判据来源：正文不留项目事故，那事故必须有个家。这条是「案例外置」的另一半——
       # 只挡不许写、不给它去处，结果是判据失去可辩论的依据。
+      # ⚠️ 必须**按小节边界**提取：曾用 `grep -A20`，把引用挪到下一节仍能过检
+      #    （外部 review 复现）。固定行数的窗口不是小节。
       grep -q '^## 判据来源' "$f" || \
-        fail "$name: 状态 enabled 但缺 '## 判据来源' 一节（正文不放案例，实证必须指向 decisions/ 与 evals/）"
-      grep -A20 '^## 判据来源' "$f" | grep -q 'decisions/' || \
-        fail "$name: §判据来源 里没有任何 decisions/ 引用——判据的由来无处可查"
+        fail "$name: 状态 enabled 但缺 '## 判据来源' 一节（正文不放项目事故，实证必须指向 decisions/ 与 evals/）"
+      src_sec="$(awk '/^## 判据来源/{f=1;next} f&&/^## /{exit} f' "$f")"
+      printf '%s' "$src_sec" | grep -q 'decisions/' || \
+        fail "$name: §判据来源 本节内没有 decisions/ 引用——判据的由来无处可查（引用写在别的小节不算）"
       for sec in 正触发 负触发 诱人错误; do
         grep -q "^## $sec" "$ev" || fail "$name: EVALS.md 缺 '## $sec' 小节"
       done
