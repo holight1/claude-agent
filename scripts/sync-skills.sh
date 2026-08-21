@@ -130,12 +130,16 @@ else
   fi
 fi
 
-# opencode：配置项指绝对路径，不由本脚本改写用户配置
-if [ -f "$OPENCODE_CFG" ] && grep -q "$ENABLED" "$OPENCODE_CFG"; then
+# opencode：配置项指绝对路径。本脚本**不改写**含密钥的用户配置，
+# 但必须把「没配」变成一条会失败的校验 —— 否则启用池与 opencode 配置
+# 各自漂移且无人发现（2026-08-21 sim SIM-001a 终审 C5）。
+if [ ! -f "$OPENCODE_CFG" ]; then
+  echo "  opencode: $OPENCODE_CFG 不存在，跳过"
+elif grep -q "$ENABLED" "$OPENCODE_CFG"; then
   echo "  opencode: 配置已指向 $ENABLED"
 else
-  echo "  opencode: 需在 $OPENCODE_CFG 顶层加入 —— 本脚本不改写用户配置"
-  echo "            \"skills\": { \"paths\": [\"$ENABLED\"] }"
+  fail "opencode 配置未指向启用池 —— 请在 $OPENCODE_CFG 顶层加入（本脚本不改写含密钥的用户配置）:
+            \"skills\": { \"paths\": [\"$ENABLED\"] }"
 fi
 
 echo "== 结果：$n_src 个规范源 / $n_enabled 个启用 / $errors 处错误 =="

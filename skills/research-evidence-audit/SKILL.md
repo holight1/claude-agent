@@ -5,7 +5,7 @@ description: Use when a research, source-reading, knowledge-extraction, or fact-
 
 # 研究证据审计
 
-**状态**：dormant
+**状态**：enabled
 **消费者**：架构师（CC）
 **来源**：本框架抽取记录被 Codex review 阻断的 7 处 + 三起同形状的计数事故
 **核心判断**：这条引文，原文里真的连着这么一句吗？这个数字，是哪条命令产生的？
