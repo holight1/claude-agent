@@ -52,13 +52,23 @@ for f in "$DEC"/*.md; do
     fail "$name: '## 备选方案' 为空。没有真实备选就写「无备选：<理由>」，不要留白也不要编造"
   fi
 
-  # 日期行必须与文件名里的日期一致
+  # 日期行必须与文件名里的日期一致，且必须是真实存在的日历日
+  # 🔴 判别式：**日期必须能被日期库解析，且往返回来与原串逐字相等。**
+  # 只校验外形（`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`）挡不住 2026-99-99 / 2026-02-30。
+  # 这是同一个对象（日期字段）第二次失效——第一次是正则 `[0-9-]*` 匹配空串，
+  # 修到了形状层就停了。按 skills/gate-design-and-negative-testing §2 不再补特例
+  # 枚举（不去列「月不得 >12」「2 月不得 >29」…），改用往返相等这条判别式：
+  # 它对任意日期串都能回答，且自动覆盖闰年。外部 review 抓出（P2）。
   fn_date="${name%%-*}-$(echo "$name" | cut -d- -f2)-$(echo "$name" | cut -d- -f3)"
   doc_date="$(sed -n 's/^\*\*日期\*\*：[[:space:]]*\(.*\)$/\1/p' "$f" | head -1 | sed 's/[[:space:]]*$//')"
   if [ -z "$doc_date" ]; then
     fail "$name: 缺 '**日期**：' 行或其值为空"
   elif ! printf '%s' "$doc_date" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
     fail "$name: 日期 '$doc_date' 不是 YYYY-MM-DD"
+  elif [ "$(date -d "$doc_date" +%Y-%m-%d 2>/dev/null || true)" != "$doc_date" ]; then
+    fail "$name: 日期 '$doc_date' 外形合法但不是真实日历日（date -d 往返不相等）"
+  elif [ "$(date -d "$fn_date" +%Y-%m-%d 2>/dev/null || true)" != "$fn_date" ]; then
+    fail "$name: 文件名日期 '$fn_date' 不是真实日历日"
   elif [ "$doc_date" != "$fn_date" ]; then
     fail "$name: 日期行 '$doc_date' 与文件名日期 '$fn_date' 不一致"
   fi

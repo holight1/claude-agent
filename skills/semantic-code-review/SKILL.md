@@ -12,6 +12,17 @@ description: Use when reviewing a code diff or implementation task — pins the 
 **来源**：dsh `dsh-code-review`；正文于 2026-08-21 补写，触发事件见 §附录
 **核心判断**：这个改动在**真实入口**上跑起来会怎样，而不是在测试里怎样？
 
+**本 skill 是判据，不是完整清单。** 一条有实据的阻断胜过一串细枝末节。判据的由来与实测事故在下方「判据来源」的记录与 `evals/EVALS.md` 里。
+
+## 判据来源
+
+- `decisions/2026-08-21-adopt-sim-process-notes.md` — 第三类失效（通过但不约束声称的性质）的原始证据
+- `decisions/2026-08-21-reviewer-reads-framework-skills.md` — 审查者读哪些框架文件
+- `decisions/2026-08-21-reviewer-role-not-vendor.md` — 角色不绑厂商
+- `decisions/2026-08-21-boundary-discriminant-over-coverage.md` — 防造假机制的作用集合
+- `decisions/2026-08-21-vacuous-bound-assertion.md` — 界断言空转，与第三类失效的分界
+- `evals/EVALS.md` — 每条判据对应的具体场景与实测数字
+
 ---
 
 ## 跨角色必读
@@ -151,12 +162,12 @@ description: Use when reviewing a code diff or implementation task — pins the 
 
 ## 附录 · 本 skill 的补写触发事件
 
-2026-08-21，sim 工作区 SIM-001a 终审发现三条缺陷，执行方与独立 reviewer **均未抓到**：
+某轮终审发现三条缺陷，执行方与独立 reviewer **均未抓到**：
 
 - 一条测试用反例证伪法一击即破（忽略入参的坏实现照样全绿）→ 催生 §2 第三类与 §2.1
 - 一个硬编码默认值逃过防魔数检查，只因清单用省略号写得不全 → 催生 §3 末尾的盲区提醒与 §4
 - 一个凭空发明的校验门限落在检查清单的分类夹缝里 → 催生 §3
 
-三条的共同点：**检查清单缺的不是细致度，是整整一类失败模式。**
+三条的共同点：**检查清单缺的不是细致度，是整整一类失败模式。** 原始证据见「判据来源」。
 
 > 三条的原文、判据与逐条归因见 `~/sim/tasks/SIM-001a-spec-ir-determinism.md` §架构师终审 §2 与 §8.1。本 skill 不复制其内容。框架侧的处置记录：`~/claude-agent/decisions/2026-08-21-project-to-framework-backflow.md`

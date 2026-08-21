@@ -81,22 +81,80 @@ for d in "$SRC"/*/; do
     fi
   fi
 
+  # ---------- 具体案例不得进 SKILL.md 正文 ----------
+  # 🔴 判别式（不是词黑名单）：**skill 正文里的数字只能是判据的参数，不得是无出处的实测值。**
+  # 实测值有两个机械可判的特征：科学计数法，以及四位及以上的裸数字字面量。
+  # 框架级判据的参数（行数上限、第几次、闭集大小）都是小整数，不需要这两种形态。
+  #
+  # 分档按**上下文成本**，不按喜好：
+  #   - `## 跨角色必读` 零容忍 —— 它投影进每个项目执行端**每轮必读**的文件；
+  #   - 正文其余部分：科学计数法一律禁；四位以上数字**只允许出现在带出处的行上**
+  #     （行内含 `decisions/`、`process-note`、`~/` 或 `.md`）。引用编号不是实测值，
+  #     而无出处的实测值就是本条要挡的东西。
+  #
+  # 为什么必须挡：skill 是**用户级**载体，每个仓都加载。某个受管项目的实测值写在这里
+  # = 别的仓永久付出上下文成本 + 命中「跨仓错位」这一类诱人错误。
+  # 对照 dsh：它的 skill 在 `.agents/skills/`（**项目级**），永远不会在别的仓被读到，
+  # 所以写满本仓命令与阈值是对的；而它三个 skill 里的事故叙事是 **0 处**，
+  # 事故证据全在 Agent Notes 的 `## Problem`。
+  # 详见 decisions/2026-08-21-skill-carries-criteria-not-cases.md
+  if [ "$st" != "dropped" ]; then
+    sci="$(grep -nE '[0-9]\.?[0-9]*e[+-]?[0-9]+' "$f" | head -3 | cut -c1-60 | tr '\n' ' ' || true)"
+    [ -z "$sci" ] || fail "$name: SKILL.md 出现科学计数法（$sci）——实测值的特征，案例数字放 evals/ 或 decisions/，正文只留判据"
+
+    big="$(grep -nE '(^|[^0-9A-Za-z_.-])[0-9]{4,}([^0-9A-Za-z_%-]|$)' "$f" \
+           | grep -vE 'decisions/|process-note|~/|\.md' | head -3 | cut -c1-60 | tr '\n' ' ' || true)"
+    [ -z "$big" ] || fail "$name: SKILL.md 有四位以上数字且该行无出处（$big）——判据的参数是小整数，无出处的大数值多为某仓实测值"
+
+    if grep -q '^## 跨角色必读' "$f"; then
+      cross="$(sed -n '/^## 跨角色必读/,/^---$/p' "$f" \
+               | grep -nE '[0-9]\.?[0-9]*e[+-]?[0-9]+|(^|[^0-9A-Za-z_.-])[0-9]{4,}([^0-9A-Za-z_%-]|$)' \
+               | head -3 | cut -c1-60 | tr '\n' ' ' || true)"
+      [ -z "$cross" ] || fail "$name: §跨角色必读 出现实测值形态的数字（$cross）——该节投影进每个项目每轮必读的文件，零容忍"
+    fi
+  fi
+
   # enabled 必须有 evals/EVALS.md，且「判据：§…」指向 SKILL.md 里真实存在的小节
   if [ "$st" = "enabled" ]; then
     ev="$d/evals/EVALS.md"
     if [ ! -f "$ev" ]; then
       fail "$name: 状态 enabled 但缺 evals/EVALS.md（见 skills/README.md §Eval 约定）"
     else
+      # 判据来源：正文不留实证，那实证必须有个家。这条是「案例外置」的另一半——
+      # 只挡不许写、不给它去处，结果是判据失去可辩论的依据。
+      grep -q '^## 判据来源' "$f" || \
+        fail "$name: 状态 enabled 但缺 '## 判据来源' 一节（正文不放案例，实证必须指向 decisions/ 与 evals/）"
+      grep -A20 '^## 判据来源' "$f" | grep -q 'decisions/' || \
+        fail "$name: §判据来源 里没有任何 decisions/ 引用——判据的由来无处可查"
       for sec in 正触发 负触发 诱人错误; do
         grep -q "^## $sec" "$ev" || fail "$name: EVALS.md 缺 '## $sec' 小节"
       done
-      # 正/负触发至少各一条数据行（表头与分隔行不算）
+      # 🔴 数据行判别式：一条**有效**数据行 = 去掉表头行、分隔行后，**每一格都非空**。
+      # 只数表格行是不够的：`| | |` 是一行合法 markdown、能过计数，却什么用例也没描述。
+      # 由来：本仓 eval 门禁第二次在同一个对象上失效（第一次是「只查小节标题、
+      # 不查每行是否绑定判据」），外部 review 抓出（P2）。按
+      # skills/gate-design-and-negative-testing §2，这里给判别式而不是再补一种特例：
+      # 判据是「格内有无实质内容」，对任意新表格都能回答。
+      # 正/负触发至少各一条**有效**数据行
       for sec in 正触发 负触发; do
-        n_row="$(sed -n "/^## $sec/,/^## /p" "$ev" | grep -c '^|' || true)"
-        [ "$n_row" -ge 3 ] || fail "$name: EVALS.md §$sec 没有数据行（当前 $n_row 行表格，需表头+分隔+至少一条）"
+        n_row=0; n_empty=0
+        while IFS= read -r row; do
+          case "$row" in
+            '|---'*|'| ---'*|'|--'*) continue ;;
+            '| 场景 '*|'|场景'*) continue ;;
+          esac
+          n_row=$((n_row + 1))
+          # 去掉首尾竖线后按 | 拆格，任一格无非空白字符即为空行
+          cells="$(printf '%s' "$row" | sed 's/^|//; s/|$//')"
+          if printf '%s' "$cells" | awk -F'|' '{for(i=1;i<=NF;i++){g=$i; gsub(/[[:space:]]/,"",g); if(g=="") exit 1}}'; then :; else
+            n_empty=$((n_empty + 1))
+          fi
+        done <<< "$(sed -n "/^## $sec/,/^## /p" "$ev" | grep '^|' || true)"
+        [ "$n_row" -ge 1 ] || fail "$name: EVALS.md §$sec 没有数据行"
+        [ "$n_empty" -eq 0 ] || fail "$name: EVALS.md §$sec 有 $n_empty/$n_row 条数据行存在空格子——空行能过计数但没描述任何用例"
       done
-      # 诱人错误：每条数据行都必须绑定判据
-      n_row=0; n_bad=0
+      # 诱人错误：每条数据行都必须绑定判据，且不得有空格子
+      n_row=0; n_bad=0; n_empty=0
       while IFS= read -r row; do
         case "$row" in
           '|---'*|'| ---'*|'|--'*) continue ;;
@@ -104,9 +162,14 @@ for d in "$SRC"/*/; do
         esac
         n_row=$((n_row + 1))
         case "$row" in *'判据：§'*) ;; *) n_bad=$((n_bad + 1)) ;; esac
+        cells="$(printf '%s' "$row" | sed 's/^|//; s/|$//')"
+        if printf '%s' "$cells" | awk -F'|' '{for(i=1;i<=NF;i++){g=$i; gsub(/[[:space:]]/,"",g); if(g=="") exit 1}}'; then :; else
+          n_empty=$((n_empty + 1))
+        fi
       done <<< "$(sed -n '/^## 诱人错误/,/^## /p' "$ev" | grep '^|')"
       [ "$n_row" -ge 1 ] || fail "$name: EVALS.md §诱人错误 没有数据行"
       [ "$n_bad" -eq 0 ] || fail "$name: EVALS.md §诱人错误 有 $n_bad/$n_row 条缺「判据：§」——决策要求每条都绑定"
+      [ "$n_empty" -eq 0 ] || fail "$name: EVALS.md §诱人错误 有 $n_empty/$n_row 条数据行存在空格子"
       while IFS= read -r frag; do
         [ -n "$frag" ] || continue
         grep -qE "^#{1,4} .*$(printf '%s' "$frag" | sed 's/[][\.*^$/]/\\&/g')" "$f" || \

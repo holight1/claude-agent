@@ -11,6 +11,15 @@ description: Use when a change touches behavior, architecture, cross-file conven
 **来源**：dsh `.agents/notes/` 制度；本框架 `decisions/` 于 2026-08-21 建立
 **核心判断**：将来有人想把这个决定改回去时，他需要的信息现在在不在？
 
+**本 skill 是判据，不是完整清单。** 判据的由来在下方「判据来源」的记录里。
+
+## 判据来源
+
+- `decisions/2026-08-21-decision-records-in-framework-repo.md` — 为什么记录放框架仓、记录该覆盖哪些改动
+- `decisions/2026-08-21-framework-repo-shared-by-sessions.md` — 多会话共用一个框架仓时记录的作用
+- `decisions/2026-08-21-project-to-framework-backflow.md` — 记录在项目→框架闭环里的位置
+- `evals/EVALS.md` — 每条判据对应的具体场景
+
 ## 何时用
 
 **触发**：改动触及行为、架构、跨文件约定、流程、工具、测试策略、持久 / 线协议 / 配置格式；或者你正在推翻一条已有的约定。

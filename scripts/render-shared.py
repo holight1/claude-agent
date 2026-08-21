@@ -44,6 +44,7 @@ def main() -> int:
     check = '--check' in sys.argv[1:]
     plan = {}                      # target file -> {skill: rendered}
     errors = []
+    n_shared_enabled = 0
     for name in sorted(os.listdir(SKILLS)):
         sp = os.path.join(SKILLS, name, 'SKILL.md')
         if not os.path.isfile(sp):
@@ -52,14 +53,17 @@ def main() -> int:
         m = re.search(r'^\*\*投影\*\*：(.+)$', text, re.M)
         if not m or m.group(1).strip() == '无':
             continue
-        # 休眠或移出启用池的 skill 不得继续投影——否则它对执行端仍然生效
+        # `**投影**` 声明的是「投到哪」，不是「现在正在投」。是否生效由
+        # 状态 + 启用池决定。所以休眠/移出启用池**不是错误**，它是合法的停用态：
+        # 此处直接跳过，剩余的标记块由下面的孤儿检查负责报错。
+        # 由来：此前这里无条件 fail，导致共享 skill **没有任何能通过门禁的停用态**
+        # ——声明投影就 fail，改 `投影：无` 又被 sync-skills 的「共享不得为无」挡住。
+        # 死锁由外部 review 抓出（P1）。
         st = re.search(r'^\*\*状态\*\*：(\S+)', text, re.M)
         st = st.group(1) if st else ''
         if st != 'enabled' or not os.path.islink(os.path.join(ENABLED, name)):
-            errors.append(f'{name}: 声明了投影目标，但状态为「{st or "缺失"}」'
-                          f'{"、且不在启用池" if not os.path.islink(os.path.join(ENABLED, name)) else ""}。'
-                          f'请先删除目标文件里它的标记块，再改状态')
             continue
+        n_shared_enabled += 1
         body = extract(sp)
         if not body:
             errors.append(f'{name}: 声明了投影目标但没有 `{SECTION}` 一节')
@@ -67,16 +71,32 @@ def main() -> int:
         for tgt in [t.strip() for t in m.group(1).split(',')]:
             plan.setdefault(tgt, {})[name] = body
 
-    # 孤儿标记块：目标文件里有块，但没有对应的、当前生效的共享 skill
+    # 标记块的基数与孤儿检查。
+    # 🔴 基数判别式：**每个 skill 在每个目标文件里的标记块必须恰好出现一次，
+    #    且 BEGIN 与 END 计数相等。** 下面用 text.index() 定位，它只看得见第一个
+    #    ——第二份手抄或过期的块会完全不被检查却继续进入消费者上下文，
+    #    破坏「单一可编辑源」这条本脚本存在的理由。外部 review 抓出（P1）。
     for tgt in sorted(os.listdir(TARGET_DIR)):
         path = os.path.join(TARGET_DIR, tgt)
         if not os.path.isfile(path) or not tgt.endswith('.md'):
             continue
         text = io.open(path, encoding='utf-8').read()
-        for found in re.findall(r'<!-- BEGIN SKILL-BLOCK: ([^>]+?) -->', text):
+        begins = re.findall(r'<!-- BEGIN SKILL-BLOCK: ([^>]+?) -->', text)
+        ends = re.findall(r'<!-- END SKILL-BLOCK: ([^>]+?) -->', text)
+        for found in sorted(set(begins)):
+            nb, ne = begins.count(found), ends.count(found)
+            if nb > 1 or ne > 1:
+                errors.append(f'{tgt}: {found} 的标记块出现 {nb} 次 BEGIN / {ne} 次 END'
+                              f' —— 必须恰好一次。多出来的那份不会被校验，'
+                              f'却仍进入消费者上下文，等于第二个可编辑源')
+            elif nb != ne:
+                errors.append(f'{tgt}: {found} 的 BEGIN/END 不配对（{nb}/{ne}）')
             if found not in plan.get(tgt, {}):
                 errors.append(f'{tgt}: 孤儿标记块 {found} —— 该 skill 已不是生效的共享 skill，'
                               f'请删除这对标记及其内容')
+        for found in sorted(set(ends) - set(begins)):
+            errors.append(f'{tgt}: {found} 有 END 但无 BEGIN')
+
 
     n_blocks = 0
     for tgt, blocks in sorted(plan.items()):
@@ -104,9 +124,13 @@ def main() -> int:
         if not check:
             io.open(path, 'w', encoding='utf-8').write(text)
 
-    print(f'  处理了 {n_blocks} 个共享块，投影到 {len(plan)} 个目标文件')
-    if n_blocks == 0:
-        print('  [FAIL] 0 个共享块 —— 渲染没有作用对象，结果无效')
+    print(f'  处理了 {n_blocks} 个共享块，投影到 {len(plan)} 个目标文件'
+          + (f'（{n_shared_enabled} 个共享 skill 在启用池）' if n_blocks == 0 else ''))
+    # 0 块的判据要分两种：没有任何生效的共享 skill ⇒ 合法（全部停用是允许的状态）；
+    # 有生效的共享 skill 却渲染出 0 块 ⇒ 渲染没有作用对象，无效。
+    if n_blocks == 0 and n_shared_enabled > 0:
+        print(f'  [FAIL] 有 {n_shared_enabled} 个生效的共享 skill，却渲染出 0 个块'
+              f' —— 渲染没有作用对象，结果无效')
         return 1
     for e in errors:
         print(f'  [FAIL] {e}')

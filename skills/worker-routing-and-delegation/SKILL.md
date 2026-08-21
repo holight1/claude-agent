@@ -11,6 +11,14 @@ description: Use when choosing between executor, subagent, and independent revie
 **来源**：dsh 的委托边界 + DSH-003a（策略继承 / 管理者所有权 / 失败事实）+ 本框架实测修正
 **核心判断**：这件事的结果，架构师能不能独立机械核对？
 
+**本 skill 是判据，不是完整清单。** 判据的由来在下方「判据来源」的记录里。
+
+## 判据来源
+
+- `decisions/2026-08-21-worker-routing-single-criterion.md` — 单一判据（能否机械验证）与被删掉的旧判据
+- `decisions/2026-08-21-skill-consumer-split-and-generated-projection.md` — 为什么它是架构师专用
+- `evals/EVALS.md` — 每条判据对应的具体场景
+
 ## 何时用
 
 **触发**：决定一个任务发给谁；决定要不要引入独立审查；创建委托型子任务。
