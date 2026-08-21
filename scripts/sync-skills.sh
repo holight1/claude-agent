@@ -50,6 +50,25 @@ for d in "$SRC"/*/; do
   fi
   STATUS_OF["$name"]="$st"
 
+  # enabled 必须有 evals/EVALS.md，且「判据：§…」指向 SKILL.md 里真实存在的小节
+  if [ "$st" = "enabled" ]; then
+    ev="$d/evals/EVALS.md"
+    if [ ! -f "$ev" ]; then
+      fail "$name: 状态 enabled 但缺 evals/EVALS.md（见 skills/README.md §Eval 约定）"
+    else
+      for sec in 正触发 负触发 诱人错误; do
+        grep -q "^## $sec" "$ev" || fail "$name: EVALS.md 缺 '## $sec' 小节"
+      done
+      n_temp="$(grep -c '判据：§' "$ev")"
+      [ "$n_temp" -ge 1 ] || fail "$name: EVALS.md 没有任何带「判据：§」的诱人错误条目"
+      while IFS= read -r frag; do
+        [ -n "$frag" ] || continue
+        grep -qE "^#{1,4} .*$(printf '%s' "$frag" | sed 's/[][\.*^$/]/\\&/g')" "$f" || \
+          fail "$name: EVALS.md 的「判据：§$frag」在 SKILL.md 里找不到对应小节标题"
+      done <<< "$(sed -n 's/.*判据：§\([^|]*\).*/\1/p' "$ev" | sed 's/[[:space:]]*$//')"
+    fi
+  fi
+
   if hit="$(grep -nEo "$LEAK_RE" "$f" | head -3)"; then
     [ -n "$hit" ] && fail "$name: 正文出现具体项目命令（见 skills/README.md §硬规则）: $(echo "$hit" | tr '\n' ' ')"
   fi

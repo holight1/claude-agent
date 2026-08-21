@@ -5,7 +5,7 @@ description: Use when choosing between executor, subagent, and independent revie
 
 # Worker 路由与委托
 
-**状态**：dormant
+**状态**：enabled
 **消费者**：架构师（CC）
 **来源**：dsh 的委托边界 + DSH-003a（策略继承 / 管理者所有权 / 失败事实）+ 本框架实测修正
 **核心判断**：这件事的结果，架构师能不能独立机械核对？
@@ -76,6 +76,8 @@ description: Use when choosing between executor, subagent, and independent revie
 - 判据落在「我说不清能不能验证」→ 先回 `task-contract-design`，不要先选 worker
 - 需要委托方"理解我的意图"才能做对 → 意图没写进任务文件，不要下发
 
-## 一条待决的框架冲突
+## 与 `USAGE.md` 的关系
 
-`USAGE.md` 与架构师 memory 目前仍有**按行数路由**的规则（「改动超过 3 行 → 下发任务」）。本 skill 的判据与它冲突。启用本 skill 前需先删掉那条，否则两套判据并存。
+按行数路由的旧规则（「改动超过 3 行 → 下发任务」）与按文件类型决定独立审查的旧规则（「纯文档任务可跳过」），已于 2026-08-21 从 `USAGE.md` 删除，改为指向本 skill。**框架内只有这一套判据。**
+
+理由见 `~/claude-agent/decisions/2026-08-21-worker-routing-single-criterion.md`。
