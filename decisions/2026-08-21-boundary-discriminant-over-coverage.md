@@ -3,8 +3,8 @@
 **状态**：现行
 **日期**：2026-08-21
 **触发**：sim 记录到同一类缺口**第三次**换位置复发；本框架自己的门禁也连着三次「再补一格」（悬空链接 → glob 解析 → 日期/自指/成环）。两边都在扩大覆盖，都没定义边界。
-**证据**：`~/sim/code-agent/process-notes/0007-boundary-never-defined-only-pushed-outward.md`（三轮形态与修法对照表）、`0004-antifake-mechanism-own-coverage-unaudited.md`（作用集合无人审）、`0005-local-copies-of-generic-rules-drift.md`、`0006-formula-implementation-without-handcheck.md`；外部 review §二 R3。**本仓不复制其内容，以那四份文件为准。**
-**作用面**：新增 `skills/gate-design-and-negative-testing/`（enabled）；`skills/task-contract-design/SKILL.md` 互为负测试节；`skills/process-gap-capture/SKILL.md` 硬规矩与触发；`collab-framework/DS-common.md` §工作流程第 4 步。
+**证据**：`~/sim/code-agent/process-notes/0007-boundary-never-defined-only-pushed-outward.md`（三轮形态与修法对照表）、`0009-ledger-is-still-a-hand-maintained-list.md`（同一个病的第二、第三、第四个位置 + 判别式落地后的独立探针）、`0004-antifake-mechanism-own-coverage-unaudited.md`（作用集合无人审）、`0005-local-copies-of-generic-rules-drift.md`、`0006-formula-implementation-without-handcheck.md`；`~/sim/tasks/SIM-004-ledger-discriminant-qos-multihop.md` §独立复算 1、§我核对到不对 4；外部 review §二 R3。**本仓不复制其内容，以那些文件为准。**
+**作用面**：新增 `skills/gate-design-and-negative-testing/`（enabled）；`skills/task-contract-design/SKILL.md` 互为负测试节与作弊路径表；`skills/process-gap-capture/SKILL.md` 硬规矩、触发与「结案动作」节；`collab-framework/DS-common.md` §工作流程第 4 步。
 
 ## 决定
 
@@ -22,6 +22,12 @@
 | 第二次换位置 | **禁止扩大覆盖**，必须写出判别式 |
 | 第三次 | 视为设计债，单开任务偿还 |
 
+**三 · 结案动作：修好一个，去找同构的其他几个。**（2026-08-21 补，来源 0009）
+
+一条缺口用判别式修好后**还不能结案**，必须先扫一遍「本仓还有哪些守护机制的成员资格是手工维护的」，逐个给结论。且**扫描的产出必须是可执行的扫描，不是一张表**——一张手工枚举的表不能证明「没有别的手工枚举的表了」。
+
+配套两条落在 `gate-design-and-negative-testing`：判别式写完要问**正向证据是否覆盖了它的全部载体**（否则收敛演示会全落在同一侧）；判别式**自身的输入写错时必须显式失败**，不得静默跳过。
+
 同时采纳 sim 另外三条：`process-gap-capture` 补止血副本的第三段生命周期（建立 → 回流 → **撤除**）与替换式更新时的逐节比对触发（0005）；`DS-common` §工作流程第 4 步补「公式/换算类实现先用权威数字手算验证方向」（0006）。
 
 ## 为什么
@@ -37,9 +43,18 @@
 - **把这两条塞进 `task-contract-design` 与 `semantic-code-review`，不新开 skill**。放弃：两者的触发条件都不是「我正在写一个校验脚本」。本框架自己的四次门禁失效**全部发生在写脚本时**，没有任何现有 skill 会在那一刻触发——这是独立失效面。
 - **只写判别式原则，不写复发处置表**。放弃：原则已经存在过一版（「盯住复发」），它没起作用。可执行形态需要说清第几次该做什么。
 - **`check-local-copies.sh`（0005 提的段落级重复检测）**。**暂不做**：段落级相似度检测误报率高，而当前只有三个受管项目，逐节比对的人工成本低于误报的处理成本。留作项目数增长后的备选。
+- **只要求「修好一个之后再想想别处」，不要求交可执行扫描**（2026-08-21 补）。放弃：sim 实测交了一张 8 行审计表，逐条有判据、无含糊表述——**已是当时最强的表**，它自己的 reviewer 仍在建议区找出第 9 个。表这个形态本身就是被守护的那个病，不能用它来诊断自己。
 
 ## 验收证据
 
-`gate-design-and-negative-testing` 已 enabled，带 `evals/EVALS.md`（6 条诱人错误全部取自已发生的失效，含本框架门禁的四次）。`scripts/sync-skills.sh` 的 eval 门禁校验其判据引用可达。
+`gate-design-and-negative-testing` 已 enabled，带 `evals/EVALS.md`（诱人错误全部取自已发生的失效，含本框架门禁的四次）。`scripts/sync-skills.sh` 的 eval 门禁校验其判据引用可达；负测试实证：把一条 `判据：§` 改成不存在的标题 ⇒ `[FAIL]` 且退出码 1。
 
-**未验证**：这条 skill 能否真的阻止第四次外推。它的有效性只能由「下一次同类缺口出现时是否改了修法」来证明，现在没有证据。sim 的 G1 整改（SIM-003）是第一个观察点，但那不在本仓。
+**有效性已部分证实（2026-08-21 更新，此前此处写「现在没有证据」）：**
+
+| 观察点 | 结果 |
+|---|---|
+| 魔数扫描集（SIM-003） | ✅ 改了修法——写出判别式而非补第四格；架构师独立探针：重插 `8192.0` 默认值 ⇒ 门禁命中 `regulator.py:60`、退出码 1 |
+| 假设台账（SIM-004） | ✅ 改了修法——「凡 `confidence: estimated` 的已解析字段一律自动进假设清单」；架构师独立探针把证实推到 DS 与 reviewer 都没正向验过的**硬件侧**，PASS |
+| 审计表自身（第四个位置） | ❌ **未修** —— 已转 sim 侧 SIM-005，处置方向是可执行扫描 |
+
+⇒ 「第二次换位置就写判别式」这条**在两个位置上真的改变了修法**，这是本框架第二条带前后对照的制度有效性证据。但同一个病仍然**换到了第四个位置**才被问同一句话 —— 所以本记录补入「结案动作」：**判别式挡住了同一位置的复发，挡不住换位置；后者要靠结案时的同构扫描。**

@@ -2,7 +2,7 @@
 
 **状态**：现行
 **日期**：2026-08-21
-**触发**：sim 会话为解决 SIM-001a 的三条缺陷改了本仓的 skill 与脚本，理由全部写在 `~/sim/tasks/SIM-001a` §8–§9，本仓一条都没有。
+**触发**：sim 会话为解决 SIM-001a 的三条缺陷改了本仓的 skill 与脚本，理由全部写在 `~/sim/tasks/SIM-001a-spec-ir-determinism.md` §8–§9，本仓一条都没有。
 **作用面**：新增 `decisions/`、`scripts/check-decisions.sh`；`README.md` 的权威归属表。
 
 ## 决定

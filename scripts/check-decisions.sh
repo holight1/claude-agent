@@ -121,6 +121,22 @@ done
 
 # ---------- 证据链：被引用的路径必须可达 ----------
 # 仓内引用断了 = 硬失败（我们控制得了）；仓外引用断了 = 警告（别的仓可能改名或删除）。
+#
+# 🔴 成员资格判别式（不是白名单）：**反引号内的 token，剥掉定位后缀后，只要以 `~` 开头
+# 或含 `/`，就进入本集合。** 进集合后**要么被核，要么落进可被 --verbose 列出的「跳过」**，
+# 不存在第三种下场——**任何 token 都不得在进入集合之前被丢弃**。
+#   - 定位后缀 = `:行号`（`foo.py:34`、`foo.py:10-20`）或 ` §章节`（`../USAGE.md §2`）。
+#     它们是合法引用形态，剥掉后解析，不是排除理由。
+#   - 绝对路径要求**至少两段**（`/a/b`）。斜杠命令（`/rt`）与单段绝对路径（`/tmp`）
+#     因此落进跳过项 —— **是被列出，不是被静默丢弃**，抽查时看得见。
+# 由来：此前用 `\.(md|sh|py|...)$` 做入集条件，把扩展名锚在词尾，于是 `foo.py:34`
+# 这种带行号的引用**既不被核、也不进跳过计数**——整条静默消失，--verbose 也看不见。
+# 那是本仓引用集合第二次悄悄缩小（第一次是 glob），按
+# skills/gate-design-and-negative-testing §2 禁止再用「扩大覆盖」修法（补一个 `:[0-9]+`），
+# 必须改成判别式。
+# ⚠️ 第一版判别式（`^~/|.+/`）仍把 `/rt` 挡在集合外、既不核也不列，与本注释声称的
+# 性质不符 —— 由本轮负测试 3 抓出（`gate-design-and-negative-testing §7`：
+# 声称的性质必须有会失败的输入去验）。现改为「进集合后必有下场」。
 echo "== 证据链可达性 =="
 SCAN=$(ls "$DEC"/*.md "$ROOT"/skills/*/SKILL.md "$ROOT"/skills/README.md \
          "$ROOT"/collab-framework/*.md "$ROOT"/README.md "$ROOT"/USAGE.md 2>/dev/null)
@@ -134,7 +150,7 @@ for f in $SCAN; do
     case "$ref" in *'*'*) ref="${ref%%\**}"; ref="${ref%/}" ;; esac
     case "$ref" in
       "~/"*)   n_ext_or_in=1; abs="$HOME/${ref#\~/}" ;;
-      "/"*)    n_ext_or_in=1; abs="$ref" ;;
+      /*/*)    n_ext_or_in=1; abs="$ref" ;;
       skills/*|decisions/*|scripts/*|collab-framework/*|memory-template/*|enabled/*)
                abs="$ROOT/$ref" ;;
       ../*)    abs="$(dirname "$f")/$ref" ;;
@@ -150,7 +166,9 @@ for f in $SCAN; do
                    warn=$((warn + 1))
                  fi ;;
     esac
-  done <<< "$(grep -oE '`[^`]+`' "$f" | tr -d '`' | grep -E '(/|^~)' | grep -E '\.(md|sh|py|yaml|yml|json|jsonc)$|/$')"
+  done <<< "$(grep -oE '`[^`]+`' "$f" | tr -d '`' \
+              | sed -E 's/:[0-9]+(-[0-9]+)?$//; s/ +§.*$//' \
+              | grep -E '^~|/')"
 done
 echo "  核了 $n_in 条仓内引用、$n_ext 条仓外引用；跳过 $n_skip 个（模板占位符或非路径 token）；$warn 条仓外不可达"
 # 本检查自身也是「规则 + 作用集合」。集合缩小是最容易发生且最不可见的失效，
